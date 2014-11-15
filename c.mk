@@ -27,6 +27,7 @@ ifeq ($(CXX), g++)
 	CXX_GTEST_LIB			:= -pthread -lgtest 
 	CXX_LINK_STDLIB			:= 
 	CXX_LINK_LIBMATH		:= -lm
+	CXX_STD_CPP11			:= 
 endif
 
 # flags clang
@@ -54,6 +55,7 @@ ifeq ($(CXX), clang)
 	CXX_GTEST_LIB			:= -pthread -lgtest 
 	CXX_LINK_STDLIB			:= -lstdc++
 	CXX_LINK_LIBMATH		:= -lm
+	CXX_STD_CPP11			:= -std=c++11
 endif
 # implicit rules
 %.o: %.cpp
