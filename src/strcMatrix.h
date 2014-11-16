@@ -13,7 +13,7 @@ struct strcMatrix
 
         strcMatrix();
         //strcMatrix(strcMatrix const&);
-        ~strcMatrix();
+        virtual ~strcMatrix();
 
         static strcMatrix* getMultiplyIdentityMatrix();
 
