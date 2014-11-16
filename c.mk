@@ -32,7 +32,7 @@ endif
 
 # flags clang
 ifeq ($(CXX), clang)
-	CXX_ALL_WARNINGS_FLAG         := -Weverything
+	CXX_ALL_WARNINGS_FLAG         := -Weverything -Wno-c++98-compat
 #	CXX_INFORMATIONAL_WARNINGS_FLAG := -wi
 #	CXX_WARNDEPRECATE_FLAG          := -dw
 	CXX_IMPORTPATH_FLAG             := -I

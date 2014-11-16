@@ -7,7 +7,15 @@
 ///
 
 #include "strcMatrix.h"
+#include "cMeter.h"
+#include "cMeter.cpp"
 #include <cmath>
+#include <ctime>
+#include <functional>
+#include "meterFunctions.h"
+#include "cMeterDataDump.h"
+#include "cMeterDataDump.cpp"
+
 
 #ifdef TEST_RUN
 #include "gtest/gtest.h"
@@ -22,7 +30,11 @@ unsigned long fibonacciConst(int);
 strcMatrix expBySquaring(int);
 unsigned long fibonacciExpBySquare(int);
 unsigned long fibonacciDerivedFormula(int);
+void initializeMeterFunctions();
 
+cMeter<clock_t>* stopWatch;
+std::function<clock_t()> stopWatchFunc;
+cMeterDataDump<clock_t>* stopWatchDataDump;
 
 int main(
          #ifdef TEST_RUN
@@ -32,6 +44,7 @@ int main(
 {
     #ifdef TEST_RUN
     ::testing::InitGoogleTest(&argc, argv);
+    initializeMeterFunctions();
     return RUN_ALL_TESTS();
     #else
     return 0;
@@ -48,7 +61,7 @@ unsigned long fibonacciRet(int n)
     EXPECT_GE(n,0)<< "A negative value" << n << "was passed to fibonacciRet" ;
     #endif
     if(n<2)
-        return n;
+        return static_cast<unsigned long>(n);
     return fibonacciRet(n-1)+fibonacciRet(n-2);
 }
 
@@ -78,7 +91,7 @@ unsigned long fibonacciArray(int n)
     EXPECT_GE(n,0)<< "A negative value" << n << "was passed to fibonacciArray";
     #endif
     if(n<2)
-        return n;
+        return static_cast<unsigned long>(n);
     unsigned long *piVec=new unsigned long[n];
     piVec[0]=0;
     piVec[1]=1;
@@ -114,7 +127,7 @@ unsigned long fibonacciConst(int n)
     EXPECT_GE(n,0)<< "A negative value" << n << "was passed to fibonacciConst";
     #endif
     if (n<2)
-        return n;
+        return static_cast<unsigned long>(n);
     unsigned long fib1=0;
     unsigned long fib2=1;
     unsigned long ret=0;
@@ -209,7 +222,7 @@ unsigned long fibonacciExpBySquare(int n)
     EXPECT_GE(n,0)<< "A negative value" << n << "was passed to fibonacciExpBySquare";
     #endif
     if (n<2)
-        return n;
+        return static_cast<unsigned long>(n);
     strcMatrix m=expBySquaring(n);
     unsigned long ret=*m(0,1);
     return ret;
@@ -241,7 +254,7 @@ unsigned long fibonacciDerivedFormula(int n)
     EXPECT_GE(n,0)<< "A negative value" << n << "was passed to fibonacciDerivedFormula";
     #endif
     if (n<2)
-        return n;
+        return static_cast<unsigned long>(n);
     unsigned long res=static_cast<unsigned long>(floor( (1/sqrt(5))*(pow(((1+sqrt(5))/2),n))+0.5f ));
     return res;
 }
@@ -268,7 +281,7 @@ TEST (FibonacciTest,fibonacciDerivedFormulaFunction)
 constexpr unsigned long fibonacciCompileTime (unsigned int n)
 {
 
-    return n > 1 ? fibonacciConst(n) : n;
+    return n > 1 ? fibonacciConst(static_cast<int>(n)) : n;
 }
 
 #ifdef TEST_RUN
@@ -284,5 +297,107 @@ TEST (FibonacciTest,fibonacciCompileTimeBuildTableFunction)
     ASSERT_EQ(fibonacciCompileTime(70),190392490709135);
     ASSERT_EQ(fibonacciCompileTime(80),23416728348467685);
     ASSERT_EQ(fibonacciCompileTime(90),2880067194370816120);
+}
+#endif
+
+void initializeMeterFunctions()
+{
+    stopWatchFunc=clock;
+    stopWatch=new cMeter<clock_t>(stopWatchFunc);
+    stopWatch->setUnitName("time_us");
+    stopWatch->setUnitSymbol("us");
+    auto func=[] (clock_t val){return ((static_cast<float>(val))/CLOCKS_PER_SEC)*1000000;};
+    stopWatchDataDump=new cMeterDataDump<clock_t>(stopWatch);
+    stopWatchDataDump->setConversionFunction(func);
+}
+
+#ifdef TEST_RUN
+TEST (FibonacciPerformanceTest,fibonacciFunctions)
+{
+    unsigned long ret=0;
+    int batchNumber=10;
+    int testPerBatch=10;
+    stopWatchDataDump->setFilename("time_us_fibonacciRet");
+    for (int i=0; i<batchNumber; i++)
+    {
+        for(int j=0;j<testPerBatch;j++)
+        {
+            stopWatchDataDump->StartMeter();
+            ret=fibonacciRet(20);
+            stopWatchDataDump->StopMeter();
+        }
+        stopWatchDataDump->StoreBatch();
+    }
+    stopWatchDataDump->dumpData();
+
+    stopWatchDataDump->resetData();
+    stopWatchDataDump->setFilename("time_us_fibonacciArray");
+    for (int i=0; i<batchNumber; i++)
+    {
+        for(int j=0;j<testPerBatch;j++)
+        {
+            stopWatchDataDump->StartMeter();
+            ret=fibonacciArray(20);
+            stopWatchDataDump->StopMeter();
+        }
+        stopWatchDataDump->StoreBatch();
+    }
+    stopWatchDataDump->dumpData();
+
+    stopWatchDataDump->resetData();
+    stopWatchDataDump->setFilename("time_us_fibonacciConst");
+    for (int i=0; i<batchNumber; i++)
+    {
+        for(int j=0;j<testPerBatch;j++)
+        {
+            stopWatchDataDump->StartMeter();
+            ret=fibonacciConst(20);
+            stopWatchDataDump->StopMeter();
+        }
+        stopWatchDataDump->StoreBatch();
+    }
+    stopWatchDataDump->dumpData();
+
+    stopWatchDataDump->resetData();
+    stopWatchDataDump->setFilename("time_us_fibonacciExpBySquare");
+    for (int i=0; i<batchNumber; i++)
+    {
+        for(int j=0;j<testPerBatch;j++)
+        {
+            stopWatchDataDump->StartMeter();
+            ret=fibonacciExpBySquare(20);
+            stopWatchDataDump->StopMeter();
+        }
+        stopWatchDataDump->StoreBatch();
+    }
+    stopWatchDataDump->dumpData();
+
+    stopWatchDataDump->resetData();
+    stopWatchDataDump->setFilename("time_us_fibonacciDerivedFormula");
+    for (int i=0; i<batchNumber; i++)
+    {
+        for(int j=0;j<testPerBatch;j++)
+        {
+            stopWatchDataDump->StartMeter();
+            ret=fibonacciDerivedFormula(20);
+            stopWatchDataDump->StopMeter();
+        }
+        stopWatchDataDump->StoreBatch();
+    }
+    stopWatchDataDump->dumpData();
+
+    stopWatchDataDump->resetData();
+    stopWatchDataDump->setFilename("time_us_fibonacciCompileTime");
+    for (int i=0; i<batchNumber; i++)
+    {
+        for(int j=0;j<testPerBatch;j++)
+        {
+            stopWatchDataDump->StartMeter();
+            ret=fibonacciCompileTime(20);
+            stopWatchDataDump->StopMeter();
+        }
+        stopWatchDataDump->StoreBatch();
+    }
+    stopWatchDataDump->dumpData();
 }
 #endif
