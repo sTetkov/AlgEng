@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include "cMeterDataDump.h"
-/** @brief (one liner)
+/** @brief dumpData dumps the current saved data on a file
   *
-  * (documentation goes here)
   */
 template <typename T>
 void cMeterDataDump<T>::dumpData()
@@ -40,9 +39,9 @@ void cMeterDataDump<T>::dumpData()
     fclose(output);
 }
 
-/** @brief (one liner)
+/** @brief processData processes each batch to find min, max, mean and to return an array of values that can easily be used with fprintf
   *
-  * (documentation goes here)
+  * @todo: calculate standard deviation
   */
 template<typename T>
 T* cMeterDataDump<T>::processData(std::vector<T> v)
@@ -69,9 +68,8 @@ T* cMeterDataDump<T>::processData(std::vector<T> v)
     return retVec;
 }
 
-/** @brief (one liner)
+/** @brief clears the saved data
   *
-  * (documentation goes here)
   */
 template<typename T>
 void cMeterDataDump<T>::resetData()
@@ -85,9 +83,8 @@ void cMeterDataDump<T>::resetData()
 
 
 
-/** @brief (one liner)
+/** @brief setFilename sets the filename to be used
   *
-  * (documentation goes here)
   */
 template <typename T>
 void cMeterDataDump<T>::setFilename(std::string filename)
@@ -95,9 +92,8 @@ void cMeterDataDump<T>::setFilename(std::string filename)
     _filename=filename;
 }
 
-/** @brief (one liner)
+/** @brief setConversionFunction sets a conversion function if needed, for example to convert ticks to usecs
   *
-  * (documentation goes here)
   */
 template <typename T>
 void cMeterDataDump<T>::setConversionFunction(std::function<T(T)> func)
@@ -106,7 +102,7 @@ void cMeterDataDump<T>::setConversionFunction(std::function<T(T)> func)
     _needsConversion=true;
 }
 
-/** @brief (one liner)
+/** @brief StoreBatch stores the current set of registered measurements and starts a new batch
   *
   * (documentation goes here)
   */
@@ -117,9 +113,8 @@ void cMeterDataDump<T>::StoreBatch()
     _currentBatch=new std::vector<T>();
 }
 
-/** @brief (one liner)
+/** @brief StopMeter stops the measurement and saves the measured value
   *
-  * (documentation goes here)
   */
 template <typename T>
 void cMeterDataDump<T>::StopMeter()
@@ -128,9 +123,8 @@ void cMeterDataDump<T>::StopMeter()
     _currentBatch->push_back(_meterFunc->peek());
 }
 
-/** @brief (one liner)
+/** @brief StartMeter starts the meter function
   *
-  * (documentation goes here)
   */
 template <typename T>
 void cMeterDataDump<T>::StartMeter()
@@ -138,9 +132,8 @@ void cMeterDataDump<T>::StartMeter()
     _meterFunc->start();
 }
 
-/** @brief (one liner)
+/** @brief Constructor
   *
-  * (documentation goes here)
   */
  template <typename T>
  cMeterDataDump<T>::cMeterDataDump(cMeter<T>* meter)
@@ -152,9 +145,8 @@ void cMeterDataDump<T>::StartMeter()
     _currentBatch=new std::vector<T>();
 }
 
-/** @brief (one liner)
+/** @brief destructor
   *
-  * (documentation goes here)
   */
  template <typename T>
  cMeterDataDump<T>::~cMeterDataDump()

@@ -158,12 +158,12 @@ TEST (MatrixTest,strcMatrix_add)
   * results in " double free or corruption". Needs to differentiate destructor for strcMatrix
   * allocated on the heap or allocated on frames.
   */
- strcMatrix::~strcMatrix()
+/* strcMatrix::~strcMatrix()
 {
  //   for(unsigned int i=0; i<2; i++)
  //       delete[] _matrix[i];
  //   delete[] _matrix;
-}
+}*/
 
 /** @brief Constructor
   *
@@ -176,15 +176,4 @@ TEST (MatrixTest,strcMatrix_add)
         _matrix[i]=new unsigned long[2];
 	initValues(0);
 }
-
-/*
-strcMatrix::strcMatrix(strcMatrix const& copy)
-{
-    _matrix= new unsigned long*[2];
-    for(unsigned int i=0; i<2; i++)
-        _matrix[i]=new unsigned long[2];
-	for (unsigned int i=0; i<2; i++)
-        for (unsigned int j=0; j<2; j++)
-            _matrix[i][j]=*copy(i,j);
-}*/
 

@@ -4,9 +4,9 @@
 
 #include "cMeter.h"
 
-/** @brief getUnitSymbol
+/** @brief getUnitSymbol returns the measurement unit used by the meter
   *
-  * @todo: document this function
+  *
   */
 template <typename T>
 std::string cMeter<T>::getUnitSymbol()
@@ -14,9 +14,8 @@ std::string cMeter<T>::getUnitSymbol()
     return _unit;
 }
 
-/** @brief getUnitName
+/** @brief getUnitName returns the measurement type of the meter (time, cycles ...)
   *
-  * @todo: document this function
   */
 template <typename T>
 std::string cMeter<T>::getUnitName()
@@ -24,9 +23,8 @@ std::string cMeter<T>::getUnitName()
     return _dataType;
 }
 
-/** @brief setUnitSymbol
+/** @brief setUnitSymbol sets the measurement unit used by the meter
   *
-  * @todo: document this function
   */
 template <typename T>
 void cMeter<T>::setUnitSymbol(std::string unitSymbol)
@@ -34,9 +32,8 @@ void cMeter<T>::setUnitSymbol(std::string unitSymbol)
     _unit=unitSymbol;
 }
 
-/** @brief setUnitName
+/** @brief setUnitName sets the measurement type of the meter (time, cycles ...)
   *
-  * @todo: document this function
   */
 template <typename T>
 void cMeter<T>::setUnitName(std::string unitName)
@@ -44,9 +41,8 @@ void cMeter<T>::setUnitName(std::string unitName)
     _dataType=unitName;
 }
 
-/** @brief peek
+/** @brief peek returns the current measurement or the last registerd measure
   *
-  * @todo: document this function
   */
 template <typename T>
 T cMeter<T>::peek()
@@ -56,9 +52,8 @@ T cMeter<T>::peek()
     return _snap;
 }
 
-/** @brief stop
+/** @brief stop stops the measurement and saves the diff between now and start
   *
-  * @todo: document this function
   */
 template <typename T>
 void cMeter<T>::stop()
@@ -67,9 +62,8 @@ void cMeter<T>::stop()
     _running=false;
 }
 
-/** @brief start
+/** @brief start starts the measurement and saves now
   *
-  * @todo: document this function
   */
 template <typename T>
 void cMeter<T>::start()
@@ -78,19 +72,8 @@ void cMeter<T>::start()
     _snap=_meterFunction();
 }
 
-/** @brief ~cMeter
+/** @brief cMeter constructor with 3 parameters
   *
-  * @todo: document this function
-  */
-template <typename T>
- cMeter<T>::~cMeter()
-{
-
-}
-
-/** @brief cMeter
-  *
-  * @todo: document this function
   */
 template <typename T>
  cMeter<T>::cMeter(func_t func,std::string unitName,std::string unitSymbol)
@@ -101,9 +84,8 @@ template <typename T>
     _meterFunction=func;
 }
 
-/** @brief cMeter
+/** @brief cMeter constructor
   *
-  * @todo: document this function
   */
 template <typename T>
  cMeter<T>::cMeter(func_t func)
@@ -118,6 +100,9 @@ template <typename T>
     _running=false;
 }
 
+/** @brief setMeterFunction sets the function used for measurements
+  *
+  */
 template <typename T>
  void cMeter<T>::setMeterFunction(func_t func)
  {

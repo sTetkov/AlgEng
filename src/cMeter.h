@@ -16,7 +16,6 @@ class cMeter
     cMeter();
     cMeter(func_t);
     cMeter(func_t,std::string,std::string);
-    virtual ~cMeter();
 
     void setMeterFunction(func_t);
 
