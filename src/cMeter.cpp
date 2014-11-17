@@ -43,12 +43,20 @@ void cMeter<T>::setUnitName(std::string unitName)
 
 /** @brief peek returns the current measurement or the last registerd measure
   *
+  *While meter running this function is slower. If it uses different functions to start
+  *and stop measurmentes peek is not possible while meter is running, as it would create
+  *too much overhead.
   */
 template <typename T>
 T cMeter<T>::peek()
 {
     if(_running)
-        return _meterFunction()-_snap;
+      {
+	if(_useStopFunc)
+	  return(T(0));
+	else
+	  return _meterFunction()-_snap;
+      }
     return _snap;
 }
 
@@ -58,8 +66,11 @@ T cMeter<T>::peek()
 template <typename T>
 void cMeter<T>::stop()
 {
+  if(_useStopFunc)
+    _snap=_stopFunction()-_snap;
+  else
     _snap=_meterFunction()-_snap;
-    _running=false;
+  _running=false;
 }
 
 /** @brief start starts the measurement and saves now
@@ -81,6 +92,7 @@ template <typename T>
     _unit=unitSymbol;
     _dataType=unitName;
     _running=false;
+    _useStopFunc=false;
     _meterFunction=func;
 }
 
@@ -90,14 +102,16 @@ template <typename T>
 template <typename T>
  cMeter<T>::cMeter(func_t func)
 {
-    _running=false;
-    _meterFunction=func;
+  _useStopFunc=false;
+  _running=false;
+  _meterFunction=func;
 }
 
 template <typename T>
  cMeter<T>::cMeter()
 {
-    _running=false;
+  _useStopFunc=false;
+  _running=false;
 }
 
 /** @brief setMeterFunction sets the function used for measurements
@@ -107,4 +121,14 @@ template <typename T>
  void cMeter<T>::setMeterFunction(func_t func)
  {
      _meterFunction=func;
+ }
+
+/** @brief setSpecificStopFunction sets the function used for measurementsto stop measurements
+  *
+  */
+template <typename T>
+ void cMeter<T>::setSpecificStopFunction(func_t func)
+ {
+   _stopFunction=func;
+   _useStopFunc=true;
  }
