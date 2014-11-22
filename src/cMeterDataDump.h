@@ -31,8 +31,8 @@ class cMeterDataDump
 
     T min;
     T max;
-    T mean;
-    T sd;
+    double mean;
+    double sd;
 
     T* processData(std::vector<T>);
 };

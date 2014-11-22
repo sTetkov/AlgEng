@@ -26,12 +26,16 @@ class cMeter
     void setUnitName(std::string);
     void setUnitSymbol(std::string);
 
+    void setSpecificStopFunction(func_t);
+
     std::string getUnitName();
     std::string getUnitSymbol();
 
     private:
 
     func_t _meterFunction;
+    func_t _stopFunction;
+    bool _useStopFunc;
 
     T _snap;
     bool _running;

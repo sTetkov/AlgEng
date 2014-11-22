@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include "cMeterDataDump.h"
+#include <cstddef>
+#include <cmath>
+
 /** @brief dumpData dumps the current saved data on a file
   *
   */
@@ -15,7 +18,7 @@ void cMeterDataDump<T>::dumpData()
     char col5[21];
     char col6[31];
     char formatTitleString[119]="%7s %19s %19s %19s %19s %19s\n";
-    char formatDataString[]=    "%7i %19i %19i %19i %19i     ";
+    char formatDataString[]=    "%7i %19i %19i %19.10f %19.10f     ";
     snprintf(col2,20,"min[%s]",_meterFunc->getUnitSymbol().c_str());
     snprintf(col3,20,"max[%s]",_meterFunc->getUnitSymbol().c_str());
     snprintf(col4,20,"mean[%s]",_meterFunc->getUnitSymbol().c_str());
@@ -55,7 +58,7 @@ T* cMeterDataDump<T>::processData(std::vector<T> v)
     min=v[0];
     max=T(0);
     T sum(0);
-    sd=T(0);
+    sd=0;
     for (int i=0; i< v.size(); i++)
         {
             if(v[i]<min)
@@ -64,7 +67,14 @@ T* cMeterDataDump<T>::processData(std::vector<T> v)
                 max=v[i];
             sum+=v[i];
         }
-    mean=sum/v.size();
+    mean=static_cast<double>(sum/v.size());
+    
+    for (int i=0; i< v.size(); i++)
+        {
+            sd+=pow((v[i]-mean),2);
+        }
+    sd=sd/v.size();    
+    sd=static_cast<double>(sqrt(sd));
     return retVec;
 }
 
