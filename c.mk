@@ -1,5 +1,5 @@
 # clang
-CXX := clang
+CXX := g++
 LD := $(CXX)
 
 # flags g++
@@ -16,7 +16,7 @@ ifeq ($(CXX), g++)
 #	CXX_NOBOUNDSCHECK_FLAG          := -noboundscheck
 	CXX_UNITTEST_FLAG               := -DTEST_RUN
 	CXX_RELEASE_FLAG                := -DRELEASE
-	CXX_DEBUG_FLAG                  := -DDEBUG
+	CXX_DEBUG_FLAG                  := -DDEBUG -ggdb
 #	CXX_VERSION_FLAG                := -version=
 #	CXX_NOOBJECT_FLAG               := -o-
 #	CXX_STATIC_LIBRARY_FLAG         := -lib
@@ -27,7 +27,9 @@ ifeq ($(CXX), g++)
 	CXX_GTEST_LIB			:= -pthread -lgtest 
 	CXX_LINK_STDLIB			:= 
 	CXX_LINK_LIBMATH		:= -lm
-	CXX_STD_CPP11			:= 
+	CXX_STD_CPP11			:= -std=c++11
+	CXX_ARCH_AMD64			:= -D_AMD64_CPU
+	CXX_ARCH_X86			:= -D_X86_CPU
 endif
 
 # flags clang
@@ -56,6 +58,8 @@ ifeq ($(CXX), clang)
 	CXX_LINK_STDLIB			:= -lstdc++
 	CXX_LINK_LIBMATH		:= -lm
 	CXX_STD_CPP11			:= -std=c++11
+	CXX_ARCH_AMD64			:= -D_AMD64_CPU
+	CXX_ARCH_X86			:= -D_X86_CPU
 endif
 # implicit rules
 %.o: %.cpp
