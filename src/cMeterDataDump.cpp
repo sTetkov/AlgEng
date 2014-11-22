@@ -11,7 +11,7 @@ void cMeterDataDump<T>::dumpData()
 {
     FILE* output;
     output=fopen(_filename.c_str(),"w");
-    char col1[]="n#";
+    char col1[]="#n";
     char col2[21];
     char col3[21];
     char col4[21];
