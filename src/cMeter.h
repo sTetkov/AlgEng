@@ -1,5 +1,6 @@
 #ifndef CLASS_METER_H
 #define CLASS_METER_H
+<<<<<<< HEAD
 
 #include <cstddef>
 #include <functional>
@@ -43,3 +44,4 @@ class cMeter
     std::string _unit;
 };
 #endif
+

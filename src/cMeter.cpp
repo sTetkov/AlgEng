@@ -133,5 +133,4 @@ template <typename T>
    _stopFunction=func;
    _useStopFunc=true;
  }
- 
 
