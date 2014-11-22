@@ -13,19 +13,24 @@
 #include <functional>
 #include "cMeterDataDump.h"
 #include "cCPUMeterFunctions.h"
+#include "cSortableArray.h""
 
 ///Ugly but at the moment necessary to allow the compilation of templates
 #include "cMeter.cpp"
 #include "cMeterDataDump.cpp"
+#include "cSortableArray.cpp"
 
 
 #ifdef TEST_RUN
 #include "gtest/gtest.h"
+#include <random>
 #endif
 
 
 #define _MAX_FIB_NUMBER 93
 #define _MAX_FIB_NUMBER_DERIVED_FUNCTION 76
+#define _RND_NUMBER_GEN_SEED 42
+#define _MAX_VECTOR_SIZE_NUMBER 100
 ///
 ///Prototypes
 ///
@@ -447,6 +452,7 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsTime)
         stopWatchDataDump->StoreBatch();
     }
     stopWatchDataDump->dumpData();
+    stopWatchDataDump->resetData();
 }
 #endif
 
@@ -541,5 +547,137 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsCPUCycles)
         cpuCycleDataDump->StoreBatch();
     }
     cpuCycleDataDump->dumpData();
+    cpuCycleDataDump->resetData();
 }
 #endif
+
+#ifdef TEST_RUN
+std::vector<int> generateRandomVector(int seed, int size)
+{
+    std::mt19937 gen;
+    gen.seed(seed);
+    std::uniform_int_distribution<> dis(1, 500);
+    std::vector<int> res;
+    for(int i=0; i<size;i++)
+      res.push_back(dis(gen));
+    return res;
+}
+#endif
+
+#ifdef TEST_RUN
+TEST (SortingPerformanceTest,sortingFunctionsTime)
+{
+    int batchNumber=_MAX_VECTOR_SIZE_NUMBER;
+    int testPerBatch=10;
+    stopWatchDataDump->setFilename("time_ticks_InsertionSort");
+    for (int i=0; i<batchNumber; i++)
+    {
+      std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i);
+        for(int j=0;j<testPerBatch;j++)
+	{
+	  SortableArray<int> sa(toSort);
+	  sa.setElementsAreComparable();
+            stopWatchDataDump->StartMeter();
+            sa.InsertionSort();
+            stopWatchDataDump->StopMeter();
+        }
+        stopWatchDataDump->StoreBatch();
+    }
+    stopWatchDataDump->dumpData();
+    stopWatchDataDump->resetData();
+    
+    stopWatchDataDump->setFilename("time_ticks_quicksort");
+    for (int i=0; i<batchNumber; i++)
+    {
+      std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i);
+        for(int j=0;j<testPerBatch;j++)
+	{
+	  SortableArray<int> sa(toSort);
+	  sa.setElementsAreComparable();
+            stopWatchDataDump->StartMeter();
+            sa.QuickSort();
+            stopWatchDataDump->StopMeter();
+        }
+        stopWatchDataDump->StoreBatch();
+    }
+    stopWatchDataDump->dumpData();
+    stopWatchDataDump->resetData();
+}
+#endif
+
+#ifdef TEST_RUN
+TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
+{
+  int batchNumber=_MAX_VECTOR_SIZE_NUMBER;
+  int testPerBatch=10;
+   cpuCycleDataDump->setFilename("CPU_cycles_InsertionSort");
+    for (int i=0; i<batchNumber; i++)
+    {
+      std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i);
+        for(int j=0;j<testPerBatch;j++)
+	{
+	  SortableArray<int> sa(toSort);
+	  sa.setElementsAreComparable();
+            cpuCycleDataDump->StartMeter();
+            sa.InsertionSort();
+            cpuCycleDataDump->StopMeter();
+        }
+        cpuCycleDataDump->StoreBatch();
+    }
+    cpuCycleDataDump->dumpData();
+    cpuCycleDataDump->resetData();
+    
+    cpuCycleDataDump->setFilename("CPU_cycles_quicksort");
+    for (int i=0; i<batchNumber; i++)
+    {
+      std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i);
+        for(int j=0;j<testPerBatch;j++)
+	{
+	  SortableArray<int> sa(toSort);
+	  sa.setElementsAreComparable();
+            cpuCycleDataDump->StartMeter();
+            sa.QuickSort();
+            cpuCycleDataDump->StopMeter();
+        }
+        cpuCycleDataDump->StoreBatch();
+    }
+    cpuCycleDataDump->dumpData();
+    cpuCycleDataDump->resetData();
+}
+#endif
+
+///As for the moment I need to include the cpp, it became necessary to move the functional tests here
+#ifdef TEST_RUN
+TEST (SortableArrayTest,InsertionSortFunctionalTest)
+{
+  SortableArray<int> sa;
+  sa.setElementsAreComparable();
+  sa.AddElement(5);
+  sa.AddElement(1);
+  sa.AddElement(3);
+  sa.AddElement(4);
+  sa.AddElement(2);
+  sa.InsertionSort();
+  std::vector<int> v=sa.GetVector();
+  for (int i=0;i<v.size()-1;i++)
+    ASSERT_LE(v[i],v[i+1]);
+}
+#endif // TEST_RUN
+
+
+#ifdef TEST_RUN
+TEST (SortableArrayTest,QuickSortFunctionalTest)
+{
+  SortableArray<int> sa;
+  sa.setElementsAreComparable();
+  sa.AddElement(5);
+  sa.AddElement(1);
+  sa.AddElement(3);
+  sa.AddElement(4);
+  sa.AddElement(2);
+  sa.QuickSort();
+  std::vector<int> v=sa.GetVector();
+  for (int i=0;i<v.size()-1;i++)
+    ASSERT_LE(v[i],v[i+1]);
+}
+#endif // TEST_RUN

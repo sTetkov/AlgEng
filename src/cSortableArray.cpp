@@ -1,3 +1,4 @@
+
 #include "cSortableArray.h"
 
 #ifdef TEST_RUN
@@ -93,23 +94,6 @@ void SortableArray<T>::InsertionSort()
   }
 }
 
-#ifdef TEST_RUN
-TEST (SortableArrayTest,InsertionSort)
-{
-  SortableArray<int> sa;
-  sa.setElementsAreComparable();
-  sa.AddElement(5);
-  sa.AddElement(1);
-  sa.AddElement(3);
-  sa.AddElement(4);
-  sa.AddElement(2);
-  sa.InsertionSort();
-  std::vector<int> v=sa.GetVector();
-  for (int i=0;i<v.size()-1;i++)
-    ASSERT_LE(v[i],v[i+1]);
-}
-#endif // TEST_RUN
-
 template<typename T>
 void SortableArray<T>::QuickSort()
 {
@@ -149,19 +133,3 @@ int SortableArray<T>::qsPartition(int i, int k)
   m_vInternalVector[left]=aux;
   return left;
 }
-#ifdef TEST_RUN
-TEST (SortableArrayTest,QuickSort)
-{
-  SortableArray<int> sa;
-  sa.setElementsAreComparable();
-  sa.AddElement(5);
-  sa.AddElement(1);
-  sa.AddElement(3);
-  sa.AddElement(4);
-  sa.AddElement(2);
-  sa.QuickSort();
-  std::vector<int> v=sa.GetVector();
-  for (int i=0;i<v.size()-1;i++)
-    ASSERT_LE(v[i],v[i+1]);
-}
-#endif // TEST_RUN
