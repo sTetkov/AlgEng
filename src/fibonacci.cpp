@@ -24,6 +24,7 @@
 #ifdef TEST_RUN
 #include "gtest/gtest.h"
 #include <random>
+#include <chrono>
 #endif
 
 
@@ -32,7 +33,7 @@
 #define _RND_NUMBER_GEN_SEED 42
 #define _MAX_VECTOR_SIZE_NUMBER 100
 #define _CPU_CYCLES_MEASUREMENT "CPU_cycles"
-#define _TIME_UNITS_MEASUREMENT "Time_ticks"
+#define _TIME_UNITS_MEASUREMENT "Time_nanosecs"
 #define _NORMAL_DIST "normal_distribution"
 #define _SORTED_ARRAY "sorted_array"
 #define _REVERSE_SORTED_ARRAY "reverse_sorted_array"
@@ -61,9 +62,9 @@ std::vector<int> generateRandomVector(int, int, std::string);
 std::string generateFileName(std::string, std::string, std::string);
 #endif
 
-cMeter<clock_t>* stopWatch;
-std::function<clock_t()> stopWatchFunc;
-cMeterDataDump<clock_t>* stopWatchDataDump;
+cMeter<uint64_t>* stopWatch;
+std::function<uint64_t()> stopWatchFunc;
+cMeterDataDump<uint64_t>* stopWatchDataDump;
 cMeter<uint64_t>* cpuMeter;
 std::function<uint64_t()> startCPUMeterFunc;
 std::function<uint64_t()> stopCPUMeterFunc;
@@ -465,7 +466,7 @@ TEST (FibonacciTest,fibonacciExpByConstMemSquareFunction)
 
 void initializeMeterFunctions()
 {
-    stopWatchFunc=clock;
+    /*stopWatchFunc=clock;
     stopWatch=new cMeter<clock_t>(stopWatchFunc);
     stopWatch->setUnitName("time_us");
     stopWatch->setUnitSymbol("us");
@@ -474,6 +475,17 @@ void initializeMeterFunctions()
     auto func=[] (clock_t val){return ((static_cast<float>(val))/CLOCKS_PER_SEC)*1000000;};
     stopWatchDataDump->setConversionFunction(func);*/
    
+    stopWatchFunc =[] (){
+      auto now = std::chrono::high_resolution_clock::now();
+      uint64_t nanos = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count());
+      return nanos;
+      
+    };
+    stopWatch=new cMeter<uint64_t>(stopWatchFunc);
+    stopWatch->setUnitName("time_us");
+    stopWatch->setUnitSymbol("ns");
+    stopWatchDataDump=new cMeterDataDump<uint64_t>(stopWatch);
+    
     startCPUMeterFunc=startRDTSC;
     if(isRDTSCPsupported())
       stopCPUMeterFunc=stopRDTSCP;
