@@ -474,15 +474,15 @@ void initializeMeterFunctions()
     auto func=[] (clock_t val){return ((static_cast<float>(val))/CLOCKS_PER_SEC)*1000000;};
     stopWatchDataDump->setConversionFunction(func);*/
    
-    /*startCPUMeterFunc=startRDTSC;
+    startCPUMeterFunc=startRDTSC;
     if(isRDTSCPsupported())
       stopCPUMeterFunc=stopRDTSCP;
     else
       stopCPUMeterFunc=stopRDTSC;
     cpuMeter=new cMeter<uint64_t>(startCPUMeterFunc);
-    cpuMeter->setSpecificStopFunction(stopCPUMeterFunc);*/
-    startCPUMeterFunc=RDTSC;
-    cpuMeter=new cMeter<uint64_t>(startCPUMeterFunc);
+    cpuMeter->setSpecificStopFunction(stopCPUMeterFunc);
+    /*startCPUMeterFunc=RDTSC;
+    cpuMeter=new cMeter<uint64_t>(startCPUMeterFunc);*/
     cpuMeter->setUnitName("cpu_cycles");
     cpuMeter->setUnitSymbol("cycles");
     cpuCycleDataDump=new cMeterDataDump<uint64_t>(cpuMeter);

@@ -3,13 +3,13 @@
 
 #include <stdint.h>
 
-/*
+
 bool isRDTSCPsupported();
 uint64_t startRDTSC();
 
 uint64_t stopRDTSCP();
 uint64_t stopRDTSC();
-*/
+
 
 
 ///Simple function, the other complexer functions defined in cCPUMeterFuntions.cpp
@@ -18,11 +18,11 @@ uint64_t stopRDTSC();
 ///saying Error: unsupported instruction `mov'
 __inline__ uint64_t RDTSC() {
 #ifdef  _X86_CPU
-  uint64_t x;
+  uint64_t x=0;
   __asm__ volatile ("rdtsc" : "=A" (x));
   return x;
 #elif _AMD64_CPU
-  uint64_t a, d;
+  uint64_t a=0, d=0;
   __asm__ volatile ("rdtsc" : "=a" (a), "=d" (d));
   return (d<<32) | a;
 #endif
