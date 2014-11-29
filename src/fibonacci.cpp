@@ -48,6 +48,7 @@ unsigned long fibonacciConst(unsigned int);
 strcMatrix expBySquaring(unsigned int);
 unsigned long fibonacciExpBySquare(unsigned int);
 unsigned long fibonacciDerivedFormula(unsigned int);
+unsigned long fibonacciExpBySquareConsMem(unsigned int);
 void initializeMeterFunctions();
 
 void generateFibonacciLookUpTable(unsigned int);
@@ -349,6 +350,119 @@ unsigned long getLookUpTableFibonacciValue(unsigned int n)
   return fibLookupTable[n];
 }
 
+/// \brief: fibonacci number Exponentiation By Squaring using constant memory
+///
+unsigned long fibonacciExpBySquareConsMem(unsigned int n)
+{
+    #ifdef TEST_RUN
+    EXPECT_LE(n,_MAX_FIB_NUMBER)<< "A excessive value" << n << "was passed to fibonacciExpBySquareConsMem";
+    #endif
+    if (n<2)
+        return static_cast<unsigned long>(n);
+
+   //Until the matrix class is improved the multiplication requires some auxiliary matrixes to store values
+   strcMatrix evenM;
+   strcMatrix oddM;
+   strcMatrix auxM;
+   strcMatrix resM;
+
+   bool useOdd=false;
+   bool useEven=false;
+   bool oddFirst=false;
+   bool oddExp=false;
+   
+   *resM(0,1)=1;
+   *resM(1,0)=1;
+   *resM(1,1)=1;
+    
+   *evenM(0,1)=1;
+   *evenM(1,0)=1;
+   *evenM(1,1)=1;
+
+   *oddM(0,1)=1;
+   *oddM(1,0)=1;
+   *oddM(1,1)=1;        
+   
+   while(n>1)
+   {    
+     if(n%2==0)
+     {
+	useEven=true;//There was some even squaring
+       	*auxM(0,0)=*evenM(0,0);
+	*auxM(0,1)=*evenM(0,1);
+	*auxM(1,0)=*evenM(1,0);
+	*auxM(1,1)=*evenM(1,1);
+	evenM.multiply(auxM,auxM);
+	n/=2;
+     }
+     else
+     {
+       if(!useEven)//if the first exponent was odd I need to multiply an odd number of Matrixes
+	  oddFirst=true;
+       else
+       {
+	 oddExp=true; //if a later exponent was odd, I need to squar the odd number of matrixes
+	  *auxM(0,0)=*oddM(0,0);
+	  *auxM(0,1)=*oddM(0,1);
+	  *auxM(1,0)=*oddM(1,0);
+	  *auxM(1,1)=*oddM(1,1);
+	  oddM.multiply(auxM,auxM);
+       }
+       useOdd=true;
+       n--;
+     }
+   }
+   if(oddFirst&&oddExp)//I multiply the odd matrixes with the base value [[0,1][1,1]] only if there was squaring, otherwise the oddMatrix already has the right value
+   {
+     strcMatrix baseM;
+     *baseM(0,1)=1;
+     *baseM(1,0)=1;
+     *baseM(1,1)=1;
+     *auxM(0,0)=*oddM(0,0);
+     *auxM(0,1)=*oddM(0,1);
+     *auxM(1,0)=*oddM(1,0);
+     *auxM(1,1)=*oddM(1,1);
+     oddM.multiply(baseM,auxM);
+   }
+   if(useOdd&&useEven)
+     resM.multiply(oddM,evenM);
+   else if(useOdd)
+   {
+     *resM(0,0)=*oddM(0,0);
+     *resM(0,1)=*oddM(0,1);
+     *resM(1,0)=*oddM(1,0);
+     *resM(1,1)=*oddM(1,1);
+   }
+   else if(useEven)
+   {
+     *resM(0,0)=*evenM(0,0);
+     *resM(0,1)=*evenM(0,1);
+     *resM(1,0)=*evenM(1,0);
+     *resM(1,1)=*evenM(1,1);
+   }
+   unsigned long ret=*resM(0,1);
+   return ret;  
+}
+
+#ifdef TEST_RUN
+TEST (FibonacciTest,fibonacciExpByConstMemSquareFunction)
+{
+        ASSERT_EQ(fibonacciExpBySquareConsMem(0),0)<< "fibonacciExpBySquareConsMem returned "<<fibonacciExpBySquareConsMem(0)<< " instead of "<<0;
+        ASSERT_EQ(fibonacciExpBySquareConsMem(1),1)<< "fibonacciExpBySquareConsMem returned "<<fibonacciExpBySquareConsMem(1)<< " instead of "<<1;
+        ASSERT_EQ(fibonacciExpBySquareConsMem(2),1)<< "fibonacciExpBySquareConsMem returned "<<fibonacciExpBySquareConsMem(2)<< " instead of "<<1;
+        ASSERT_EQ(fibonacciExpBySquareConsMem(3),2)<< "fibonacciExpBySquareConsMem returned "<<fibonacciExpBySquareConsMem(3)<< " instead of "<<2;
+        ASSERT_EQ(fibonacciExpBySquareConsMem(4),3)<< "fibonacciExpBySquareConsMem returned "<<fibonacciExpBySquareConsMem(4)<< " instead of "<<3;
+        ASSERT_EQ(fibonacciExpBySquareConsMem(5),5)<< "fibonacciExpBySquareConsMem returned "<<fibonacciExpBySquareConsMem(5)<< " instead of "<<5;
+        ASSERT_EQ(fibonacciExpBySquareConsMem(6),8)<< "fibonacciExpBySquareConsMem returned "<<fibonacciExpBySquareConsMem(6)<< " instead of "<<8;
+        ASSERT_EQ(fibonacciExpBySquareConsMem(7),13)<< "fibonacciExpBySquareConsMem returned "<<fibonacciExpBySquareConsMem(7)<< " instead of "<<13;
+        ASSERT_EQ(fibonacciExpBySquareConsMem(8),21)<< "fibonacciExpBySquareConsMem returned "<<fibonacciExpBySquareConsMem(8)<< " instead of "<<21;
+        ASSERT_EQ(fibonacciExpBySquareConsMem(9),34)<< "fibonacciExpBySquareConsMem returned "<<fibonacciExpBySquareConsMem(9)<< " instead of "<<34;
+        ASSERT_EQ(fibonacciExpBySquareConsMem(10),55)<< "fibonacciExpBySquareConsMem returned "<<fibonacciExpBySquareConsMem(10)<< " instead of "<<55;
+}
+#endif
+
+
+
 void initializeMeterFunctions()
 {
     stopWatchFunc=clock;
@@ -466,6 +580,19 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsTime)
     }
     stopWatchDataDump->dumpData();
     stopWatchDataDump->resetData();
+    stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,_EMPTY_STRING,"fibonacciExBySquaringConstantMemory"));
+    for (int i=0; i<batchNumber; i++)
+    {
+        for(int j=0;j<testPerBatch;j++)
+        {
+            stopWatchDataDump->StartMeter();
+            ret=fibonacciExpBySquareConsMem(i);
+            stopWatchDataDump->StopMeter();
+        }
+        stopWatchDataDump->StoreBatch();
+    }
+    stopWatchDataDump->dumpData();
+    stopWatchDataDump->resetData();
 }
 #endif
 
@@ -561,6 +688,20 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsCPUCycles)
     }
     cpuCycleDataDump->dumpData();
     cpuCycleDataDump->resetData();
+    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,_EMPTY_STRING,"fibonacciExpBySquaringConstantMemory"));
+    for (int i=0; i<batchNumber; i++)
+    {
+        for(int j=0;j<testPerBatch;j++)
+        {
+            cpuCycleDataDump->StartMeter();
+            ret=fibonacciExpBySquareConsMem(i);
+            cpuCycleDataDump->StopMeter();
+        }
+        cpuCycleDataDump->StoreBatch();
+    }
+    cpuCycleDataDump->dumpData();
+    cpuCycleDataDump->resetData();
+  
 }
 #endif
 
