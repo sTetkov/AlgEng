@@ -1,12 +1,9 @@
 #ifndef CLASS_METER_H
 #define CLASS_METER_H
-<<<<<<< HEAD
 
 #include <cstddef>
 #include <functional>
 #include <string>
-
-
 
 template <typename T>
 class cMeter
