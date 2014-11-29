@@ -25,11 +25,13 @@ public:
    
   void InsertionSort();
   void QuickSort();
+  void Mergesort();
   
 private:
   void quicksort(int,int);
   int qsPartition(int,int);
-  
+  std::vector<T> merge(std::vector<T>, std::vector<T>);
+  std::vector<T> mergeSort(std::vector<T>);
   std::vector<T> m_vInternalVector;
 
   bool m_bLTFunAvailable;

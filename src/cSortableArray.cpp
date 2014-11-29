@@ -133,3 +133,61 @@ int SortableArray<T>::qsPartition(int i, int k)
   m_vInternalVector[left]=aux;
   return left;
 }
+
+/*
+ * brief: Mergesorting of the array
+ *
+ * Isolated the mergesort function, to stop someone to use it on a vector
+ * of the wrong type.
+ *
+ */
+template <typename T>
+void SortableArray<T>::Mergesort()
+{
+  m_vInternalVector=mergeSort(m_vInternalVector);	
+}
+	
+template <typename T>
+std::vector<T> SortableArray<T>::merge(std::vector<T> left, std::vector<T> right)
+{
+  std::vector<T> res;
+  int i=0;
+  int j=0;
+  for(int n=0;n<left.size()+right.size();n++)
+  {
+    if(i>=left.size())
+      res.push_back(right[j++]);
+    else if(j>=right.size())
+      res.push_back(left[i++]);
+    else if (left[i]<right[j])
+      res.push_back(left[i++]);
+    else
+      res.push_back(right[j++]);
+  }
+  return res;	
+}
+
+template <typename T>
+std::vector<T> SortableArray<T>::mergeSort(std::vector<T> array)
+{
+  if(static_cast<unsigned int>(array.size())==0)
+    {
+      std::vector<T> res;
+      return res;
+    }
+  if(static_cast<unsigned int>(array.size())==1)
+    return array;
+  unsigned int mid=static_cast<unsigned int>(array.size()/2);
+  unsigned int rest=static_cast<unsigned int>(array.size()-mid);
+  std::vector<T> leftVec(mid);
+  std::vector<T> rightVec(rest);
+  for (int i=0; i<mid;i++)
+  {
+    leftVec[i]=array[i];
+    if(i<rest)
+      rightVec[i]=array[mid+i];
+  }
+  leftVec=mergeSort(leftVec);
+  rightVec=mergeSort(rightVec);
+  return merge(leftVec,rightVec);
+}

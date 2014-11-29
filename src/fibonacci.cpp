@@ -13,7 +13,7 @@
 #include <functional>
 #include "cMeterDataDump.h"
 #include "cCPUMeterFunctions.h"
-#include "cSortableArray.h""
+#include "cSortableArray.h"
 
 ///Ugly but at the moment necessary to allow the compilation of templates
 #include "cMeter.cpp"
@@ -31,6 +31,14 @@
 #define _MAX_FIB_NUMBER_DERIVED_FUNCTION 76
 #define _RND_NUMBER_GEN_SEED 42
 #define _MAX_VECTOR_SIZE_NUMBER 100
+#define _CPU_CYCLES_MEASUREMENT "CPU_cycles"
+#define _TIME_UNITS_MEASUREMENT "Time_ticks"
+#define _NORMAL_DIST "normal_distribution"
+#define _SORTED_ARRAY "sorted_array"
+#define _REVERSE_SORTED_ARRAY "reverse_sorted_array"
+#define _SCRAMBLED_ARRAY "scrambled_array"
+#define _REPEATED_ELEMENTS_ARRAY "array_with_repeated_elements"
+#define _EMPTY_STRING ""
 ///
 ///Prototypes
 ///
@@ -46,6 +54,11 @@ void generateFibonacciLookUpTable(unsigned int);
 unsigned long getLookUpTableFibonacciValue(unsigned int);
 unsigned long fibLookupTable[94];
 
+#ifdef TEST_RUN
+std::vector<int> generateRandomVector(int, int);
+std::vector<int> generateRandomVector(int, int, std::string);
+std::string generateFileName(std::string, std::string, std::string);
+#endif
 
 cMeter<clock_t>* stopWatch;
 std::function<clock_t()> stopWatchFunc;
@@ -368,9 +381,9 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsTime)
     int batchNumber=_MAX_FIB_NUMBER;
     int testPerBatch=10;
     
-    int negativeOffsetFibRecursive=63;
+    int negativeOffsetFibRecursive=73;
     int negativeOffsetDerivedFormula=_MAX_FIB_NUMBER - _MAX_FIB_NUMBER_DERIVED_FUNCTION;
-    stopWatchDataDump->setFilename("time_ticks_fibonacciRet");
+    stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,_EMPTY_STRING,"fibonacci_recursive"));
     for (int i=0; i<batchNumber - negativeOffsetFibRecursive; i++)
     {
         for(int j=0;j<testPerBatch;j++)
@@ -384,7 +397,7 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsTime)
     stopWatchDataDump->dumpData();
 
     stopWatchDataDump->resetData();
-    stopWatchDataDump->setFilename("time_ticks_fibonacciArray");
+    stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,_EMPTY_STRING,"fibonacciArray"));
     for (int i=0; i<batchNumber; i++)
     {
         for(int j=0;j<testPerBatch;j++)
@@ -398,7 +411,7 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsTime)
     stopWatchDataDump->dumpData();
 
     stopWatchDataDump->resetData();
-    stopWatchDataDump->setFilename("time_ticks_fibonacciConst");
+    stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,_EMPTY_STRING,"fibonacciConst"));
     for (int i=0; i<batchNumber; i++)
     {
         for(int j=0;j<testPerBatch;j++)
@@ -412,7 +425,7 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsTime)
     stopWatchDataDump->dumpData();
 
     stopWatchDataDump->resetData();
-    stopWatchDataDump->setFilename("time_ticks_fibonacciExpBySquare");
+    stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,_EMPTY_STRING,"fibonacciExpBySquare"));
     for (int i=0; i<batchNumber; i++)
     {
         for(int j=0;j<testPerBatch;j++)
@@ -426,7 +439,7 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsTime)
     stopWatchDataDump->dumpData();
 
     stopWatchDataDump->resetData();
-    stopWatchDataDump->setFilename("time_ticks_fibonacciDerivedFormula");
+    stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,_EMPTY_STRING,"fibonacciDerivedFormula"));
     for (int i=0; i<batchNumber - negativeOffsetDerivedFormula; i++)
     {
         for(int j=0;j<testPerBatch;j++)
@@ -440,7 +453,7 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsTime)
     stopWatchDataDump->dumpData();
 
     stopWatchDataDump->resetData();
-    stopWatchDataDump->setFilename("time_ticks_fibonacciCompileTime");
+    stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,_EMPTY_STRING,"fibonacciCompileTime"));
     for (int i=0; i<batchNumber; i++)
     {
         for(int j=0;j<testPerBatch;j++)
@@ -463,9 +476,9 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsCPUCycles)
     int batchNumber=_MAX_FIB_NUMBER;
     int testPerBatch=10;
     
-    int negativeOffsetFibRecursive=63;
+    int negativeOffsetFibRecursive=73;
     int negativeOffsetDerivedFormula=_MAX_FIB_NUMBER - _MAX_FIB_NUMBER_DERIVED_FUNCTION;
-    cpuCycleDataDump->setFilename("CPU_Cycles_fibonacciRet");
+    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,_EMPTY_STRING,"fibonacci_recursive"));
     for (int i=0; i<batchNumber - negativeOffsetFibRecursive; i++)
     {
         for(int j=0;j<testPerBatch;j++)
@@ -479,7 +492,7 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsCPUCycles)
     cpuCycleDataDump->dumpData();
 
     cpuCycleDataDump->resetData();
-    cpuCycleDataDump->setFilename("CPU_Cycles_fibonacciArray");
+    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,_EMPTY_STRING,"fibonacciArray"));
     for (int i=0; i<batchNumber; i++)
     {
         for(int j=0;j<testPerBatch;j++)
@@ -493,7 +506,7 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsCPUCycles)
     cpuCycleDataDump->dumpData();
 
     cpuCycleDataDump->resetData();
-    cpuCycleDataDump->setFilename("CPU_Cycles_fibonacciConst");
+    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,_EMPTY_STRING,"fibonacciConst"));
     for (int i=0; i<batchNumber; i++)
     {
         for(int j=0;j<testPerBatch;j++)
@@ -507,7 +520,7 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsCPUCycles)
     cpuCycleDataDump->dumpData();
 
     cpuCycleDataDump->resetData();
-    cpuCycleDataDump->setFilename("CPU_Cycles_fibonacciExpBySquare");
+    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,_EMPTY_STRING,"fibonacciExpBySquare"));
     for (int i=0; i<batchNumber; i++)
     {
         for(int j=0;j<testPerBatch;j++)
@@ -521,7 +534,7 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsCPUCycles)
     cpuCycleDataDump->dumpData();
 
     cpuCycleDataDump->resetData();
-    cpuCycleDataDump->setFilename("CPU_Cycles_fibonacciDerivedFormula");
+    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,_EMPTY_STRING,"fibonacciDerivedFormula"));
     for (int i=0; i<batchNumber - negativeOffsetDerivedFormula; i++)
     {
         for(int j=0;j<testPerBatch;j++)
@@ -535,7 +548,7 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsCPUCycles)
     cpuCycleDataDump->dumpData();
 
     cpuCycleDataDump->resetData();
-    cpuCycleDataDump->setFilename("CPU_Cycles_fibonacciCompileTime");
+    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,_EMPTY_STRING,"fibonacciCompileTime"));
     for (int i=0; i<batchNumber; i++)
     {
         for(int j=0;j<testPerBatch;j++)
@@ -562,6 +575,93 @@ std::vector<int> generateRandomVector(int seed, int size)
       res.push_back(dis(gen));
     return res;
 }
+
+std::vector<int> generateRandomVector(int seed, int size, std::string distributionType)
+{
+  if(distributionType==std::string(_NORMAL_DIST))
+    {
+      std::mt19937 gen;
+      gen.seed(seed);
+      std::uniform_int_distribution<> dis(1, 500);
+      std::vector<int> res;
+      for(int i=0; i<size;i++)
+	res.push_back(dis(gen));
+      return res;
+    }
+    else if(distributionType==std::string(_SORTED_ARRAY))
+    {
+      std::vector<int> res;
+      for( int i=0; i<size; i++)
+	res.push_back(i);
+      return res;
+    }
+    else if(distributionType==std::string(_REVERSE_SORTED_ARRAY))
+    {
+      std::vector<int> res;
+      for( int i=size; i>0; i--)
+	res.push_back(i);
+      return res;
+    }
+    else if(distributionType== std::string(_SCRAMBLED_ARRAY))
+    {
+      std::mt19937 gen;
+      gen.seed(seed);
+      std::uniform_int_distribution<> dis(0, size);
+      std::vector<int> res(size);
+      for (int i=1; i<=size; i++)
+      {
+	int idx=dis(gen);
+	while(res[idx]!=0)
+	{
+	  idx++;
+	  if(idx>=size)
+	    idx=0;
+	}
+	res[idx]=i;
+      }
+      return res;
+    }
+    else if(distributionType== std::string(_REPEATED_ELEMENTS_ARRAY))
+    {
+      std::mt19937 gen;
+      gen.seed(seed);
+      std::uniform_int_distribution<> dis(0, size);
+      std::vector<int> res(size);
+      for (int i=1; i<=size; i++)
+      {
+	  int cnt=dis(gen);
+	  if(i+cnt>size)
+	      cnt=size-i;
+	  for (int j=0; j<cnt;j++)
+	  {
+	    int idx=dis(gen);
+	    while(res[idx]!=0)
+	    {
+	      idx++;
+	      if(idx>=size)
+		idx=0;
+	    }
+	    res[idx]=i;
+	  }
+	  i+=cnt;
+      }
+      return res;
+    }
+    std::mt19937 gen;
+    gen.seed(seed);
+    std::uniform_int_distribution<> dis(1, 500);
+    std::vector<int> res;
+    for(int i=0; i<size;i++)
+      res.push_back(dis(gen));
+    return res;
+}
+
+std::string generateFileName(std::string MeasurementType, std::string attributes, std::string algorithm)
+{
+  std::string res=MeasurementType+"_"+attributes+"_"+algorithm;
+  return res;
+  
+}
 #endif
 
 #ifdef TEST_RUN
@@ -569,39 +669,65 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
 {
     int batchNumber=_MAX_VECTOR_SIZE_NUMBER;
     int testPerBatch=10;
-    stopWatchDataDump->setFilename("time_ticks_InsertionSort");
-    for (int i=0; i<batchNumber; i++)
+    std::vector<std::string> arrayTypes;
+    arrayTypes.push_back(std::string(_NORMAL_DIST));
+    arrayTypes.push_back(std::string(_SORTED_ARRAY));
+    arrayTypes.push_back(std::string(_REVERSE_SORTED_ARRAY));
+    arrayTypes.push_back(std::string(_SCRAMBLED_ARRAY));
+    arrayTypes.push_back(std::string(_REPEATED_ELEMENTS_ARRAY));
+    for(int k=0; k<static_cast<int>(arrayTypes.size()); k++)
     {
-      std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i);
-        for(int j=0;j<testPerBatch;j++)
-	{
-	  SortableArray<int> sa(toSort);
-	  sa.setElementsAreComparable();
-            stopWatchDataDump->StartMeter();
-            sa.InsertionSort();
-            stopWatchDataDump->StopMeter();
-        }
-        stopWatchDataDump->StoreBatch();
+      stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"InsertionSort"));
+      for (int i=0; i<batchNumber; i++)
+      {
+	std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
+	  for(int j=0;j<testPerBatch;j++)
+	  {
+	    SortableArray<int> sa(toSort);
+	    sa.setElementsAreComparable();
+	      stopWatchDataDump->StartMeter();
+	      sa.InsertionSort();
+	      stopWatchDataDump->StopMeter();
+	  }
+	  stopWatchDataDump->StoreBatch();
+      }
+      stopWatchDataDump->dumpData();
+      stopWatchDataDump->resetData();
+      
+      stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"quicksort"));
+      for (int i=0; i<batchNumber; i++)
+      {
+	std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
+	  for(int j=0;j<testPerBatch;j++)
+	  {
+	    SortableArray<int> sa(toSort);
+	    sa.setElementsAreComparable();
+	      stopWatchDataDump->StartMeter();
+	      sa.QuickSort();
+	      stopWatchDataDump->StopMeter();
+	  }
+	  stopWatchDataDump->StoreBatch();
+      }
+      stopWatchDataDump->dumpData();
+      stopWatchDataDump->resetData();
+      
+      stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"mergesort"));
+      for (int i=0; i<batchNumber; i++)
+      {
+	std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
+	  for(int j=0;j<testPerBatch;j++)
+	  {
+	    SortableArray<int> sa(toSort);
+	    sa.setElementsAreComparable();
+	      stopWatchDataDump->StartMeter();
+	      sa.Mergesort();
+	      stopWatchDataDump->StopMeter();
+	  }
+	  stopWatchDataDump->StoreBatch();
+      }
+      stopWatchDataDump->dumpData();
+      stopWatchDataDump->resetData();
     }
-    stopWatchDataDump->dumpData();
-    stopWatchDataDump->resetData();
-    
-    stopWatchDataDump->setFilename("time_ticks_quicksort");
-    for (int i=0; i<batchNumber; i++)
-    {
-      std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i);
-        for(int j=0;j<testPerBatch;j++)
-	{
-	  SortableArray<int> sa(toSort);
-	  sa.setElementsAreComparable();
-            stopWatchDataDump->StartMeter();
-            sa.QuickSort();
-            stopWatchDataDump->StopMeter();
-        }
-        stopWatchDataDump->StoreBatch();
-    }
-    stopWatchDataDump->dumpData();
-    stopWatchDataDump->resetData();
 }
 #endif
 
@@ -610,10 +736,18 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
 {
   int batchNumber=_MAX_VECTOR_SIZE_NUMBER;
   int testPerBatch=10;
-   cpuCycleDataDump->setFilename("CPU_cycles_InsertionSort");
+  std::vector<std::string> arrayTypes;
+  arrayTypes.push_back(std::string(_NORMAL_DIST));
+  arrayTypes.push_back(std::string(_SORTED_ARRAY));
+  arrayTypes.push_back(std::string(_REVERSE_SORTED_ARRAY));
+  arrayTypes.push_back(std::string(_SCRAMBLED_ARRAY));
+  arrayTypes.push_back(std::string(_REPEATED_ELEMENTS_ARRAY));
+  for(int k=0; k<static_cast<int>(arrayTypes.size()); k++)
+  {
+   cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"InsertionSort"));
     for (int i=0; i<batchNumber; i++)
     {
-      std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i);
+      std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
         for(int j=0;j<testPerBatch;j++)
 	{
 	  SortableArray<int> sa(toSort);
@@ -627,10 +761,10 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
     cpuCycleDataDump->dumpData();
     cpuCycleDataDump->resetData();
     
-    cpuCycleDataDump->setFilename("CPU_cycles_quicksort");
+    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"quicksort"));
     for (int i=0; i<batchNumber; i++)
     {
-      std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i);
+      std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
         for(int j=0;j<testPerBatch;j++)
 	{
 	  SortableArray<int> sa(toSort);
@@ -643,6 +777,24 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
     }
     cpuCycleDataDump->dumpData();
     cpuCycleDataDump->resetData();
+    
+    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"mergesort"));
+    for (int i=0; i<batchNumber; i++)
+    {
+      std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
+        for(int j=0;j<testPerBatch;j++)
+	{
+	  SortableArray<int> sa(toSort);
+	  sa.setElementsAreComparable();
+            cpuCycleDataDump->StartMeter();
+            sa.Mergesort();
+            cpuCycleDataDump->StopMeter();
+        }
+        cpuCycleDataDump->StoreBatch();
+    }
+    cpuCycleDataDump->dumpData();
+    cpuCycleDataDump->resetData();
+  }
 }
 #endif
 
@@ -650,16 +802,48 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
 #ifdef TEST_RUN
 TEST (SortableArrayTest,InsertionSortFunctionalTest)
 {
-  SortableArray<int> sa;
+  std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,0);
+  SortableArray<int> sa(toSort);
   sa.setElementsAreComparable();
-  sa.AddElement(5);
-  sa.AddElement(1);
-  sa.AddElement(3);
-  sa.AddElement(4);
-  sa.AddElement(2);
   sa.InsertionSort();
-  std::vector<int> v=sa.GetVector();
-  for (int i=0;i<v.size()-1;i++)
+  std::vector<int> v(sa.GetVector());
+  for (int i=0;i<static_cast<int>(v.size()-1);i++)
+    ASSERT_LE(v[i],v[i+1]);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,1);
+  sa=SortableArray<int>(toSort);
+  sa.setElementsAreComparable();
+  sa.InsertionSort();
+  v=sa.GetVector();
+
+  for (int i=0;i<static_cast<int>(v.size()-1);i++)
+    ASSERT_LE(v[i],v[i+1]);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,2);
+  sa=SortableArray<int>(toSort);
+  sa.setElementsAreComparable();
+  sa.InsertionSort();
+  v=sa.GetVector();
+
+  for (int i=0;i<static_cast<int>(v.size()-1);i++)
+    ASSERT_LE(v[i],v[i+1]);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,3);
+  sa=SortableArray<int>(toSort);
+  sa.setElementsAreComparable();
+  sa.InsertionSort();
+  v=sa.GetVector();
+
+  for (int i=0;i<static_cast<int>(v.size()-1);i++)
+    ASSERT_LE(v[i],v[i+1]);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,10);
+  sa=SortableArray<int>(toSort);
+  sa.setElementsAreComparable();
+  sa.InsertionSort();
+  v=sa.GetVector();
+
+  for (int i=0;i<static_cast<int>(v.size()-1);i++)
     ASSERT_LE(v[i],v[i+1]);
 }
 #endif // TEST_RUN
@@ -668,16 +852,103 @@ TEST (SortableArrayTest,InsertionSortFunctionalTest)
 #ifdef TEST_RUN
 TEST (SortableArrayTest,QuickSortFunctionalTest)
 {
-  SortableArray<int> sa;
+  std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,0);
+  SortableArray<int> sa(toSort);
   sa.setElementsAreComparable();
-  sa.AddElement(5);
-  sa.AddElement(1);
-  sa.AddElement(3);
-  sa.AddElement(4);
-  sa.AddElement(2);
+
   sa.QuickSort();
   std::vector<int> v=sa.GetVector();
-  for (int i=0;i<v.size()-1;i++)
+
+  for (int i=0;i<static_cast<int>(v.size()-1);i++)
     ASSERT_LE(v[i],v[i+1]);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,1);
+  sa=SortableArray<int>(toSort);
+  sa.setElementsAreComparable();
+  sa.QuickSort();
+  v=sa.GetVector();
+
+  for (int i=0;i<static_cast<int>(v.size()-1);i++)
+    ASSERT_LE(v[i],v[i+1]);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,2);
+  sa=SortableArray<int>(toSort);
+  sa.setElementsAreComparable();
+  sa.QuickSort();
+  v=sa.GetVector();
+
+  for (int i=0;i<static_cast<int>(v.size()-1);i++)
+    ASSERT_LE(v[i],v[i+1]);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,3);
+  sa=SortableArray<int>(toSort);
+  sa.setElementsAreComparable();
+  sa.QuickSort();
+  v=sa.GetVector();
+
+  for (int i=0;i<static_cast<int>(v.size()-1);i++)
+    ASSERT_LE(v[i],v[i+1]);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,10);
+  sa=SortableArray<int>(toSort);
+  sa.setElementsAreComparable();
+  sa.QuickSort();
+  v=sa.GetVector();
+
+  for (int i=0;i<static_cast<int>(v.size()-1);i++)
+    ASSERT_LE(v[i],v[i+1]);
+  
+}
+#endif // TEST_RUN
+
+#ifdef TEST_RUN
+TEST (SortableArrayTest,MergeSortFunctionalTest)
+{
+  std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,0);
+  SortableArray<int> sa(toSort);
+  sa.setElementsAreComparable();
+  sa.Mergesort();
+  std::vector<int> v=sa.GetVector();
+
+  for (int i=0;i<static_cast<int>(v.size()-1);i++)
+    ASSERT_LE(v[i],v[i+1]);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,1);
+  sa=SortableArray<int>(toSort);
+  sa.setElementsAreComparable();
+  sa.Mergesort();
+  v=sa.GetVector();
+
+  for (int i=0;i<static_cast<int>(v.size()-1);i++)
+    ASSERT_LE(v[i],v[i+1]);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,2);
+  sa=SortableArray<int>(toSort);
+  sa.setElementsAreComparable();
+  sa.Mergesort();
+  v=sa.GetVector();
+
+  for (int i=0;i<static_cast<int>(v.size()-1);i++)
+    ASSERT_LE(v[i],v[i+1]);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,3);
+  sa=SortableArray<int>(toSort);
+  sa.setElementsAreComparable();
+  sa.Mergesort();
+  v=sa.GetVector();
+
+  for (int i=0;i<static_cast<int>(v.size()-1);i++)
+    ASSERT_LE(v[i],v[i+1]);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,10);
+  sa=SortableArray<int>(toSort);
+  sa.setElementsAreComparable();
+  sa.Mergesort();
+  v=sa.GetVector();
+
+  for (int i=0;i<static_cast<int>(v.size()-1);i++)
+    ASSERT_LE(v[i],v[i+1]);
+  
+
 }
 #endif // TEST_RUN
