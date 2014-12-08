@@ -79,59 +79,15 @@ T* SortableArray<T>::GetArray()
 }
    
 template<typename T>
-void SortableArray<T>::InsertionSort()
+void SortableArray<T>::Internal_InsertionSort()
 {
-  for(int i=0; i<m_vInternalVector.size(); i++)
-  {
-    int key=m_vInternalVector[i];
-    int j=i;
-    while ((j > 0) && (m_vInternalVector[j-1] > key))
-    {
-      m_vInternalVector[j]=m_vInternalVector[j-1];
-      j=j-1;
-    }
-    m_vInternalVector[j]=key;
-  }
+  m_vInternalVector=InsertionSort(m_vInternalVector);
 }
 
 template<typename T>
-void SortableArray<T>::QuickSort()
+void SortableArray<T>::Internal_QuickSort()
 {
-  quicksort(0,m_vInternalVector.size());
-}
-
-template<typename T>
-void SortableArray<T>::quicksort(int i, int k)
-{
-  int pivotPos=0;
-  if(i<k)
-  {
-    pivotPos= qsPartition(i,k);
-    quicksort(i,pivotPos);
-    quicksort(pivotPos+1,k);
-  }
-}
-
-template<typename T>
-int SortableArray<T>::qsPartition(int i, int k)
-{
-  int pivot=m_vInternalVector[i];
-  int left=i;
-  
-  for(int j=i+1;j<k;j++)
-  {
-    if(m_vInternalVector[j]<pivot)
-    {
-      left++;
-      int aux =m_vInternalVector[j];
-      m_vInternalVector[j]=m_vInternalVector[left];
-      m_vInternalVector[left]=aux;
-    }
-  }
-  int aux =m_vInternalVector[i];
-  m_vInternalVector[i]=m_vInternalVector[left];
-  m_vInternalVector[left]=aux;
-  return left;
+  m_vInternalVector=Quicksort(m_vInternalVector,0,m_vInternalVector.size());
 }
 
 /*
@@ -142,9 +98,9 @@ int SortableArray<T>::qsPartition(int i, int k)
  *
  */
 template <typename T>
-void SortableArray<T>::Mergesort()
+void SortableArray<T>::Internal_Mergesort()
 {
-  m_vInternalVector=mergeSort(m_vInternalVector);	
+  m_vInternalVector=MergeSort(m_vInternalVector);	
 }
 	
 template <typename T>
@@ -159,7 +115,7 @@ std::vector<T> SortableArray<T>::merge(std::vector<T> left, std::vector<T> right
       res.push_back(right[j++]);
     else if(j>=right.size())
       res.push_back(left[i++]);
-    else if (left[i]<right[j])
+    else if (m_fLThan(left[i],right[j]))
       res.push_back(left[i++]);
     else
       res.push_back(right[j++]);
@@ -168,26 +124,157 @@ std::vector<T> SortableArray<T>::merge(std::vector<T> left, std::vector<T> right
 }
 
 template <typename T>
-std::vector<T> SortableArray<T>::mergeSort(std::vector<T> array)
+std::vector<T> SortableArray<T>::Quicksort(std::vector<T> array)
+{
+  Quicksort(array,0,array.size());
+  return array;
+}
+
+template <typename T>
+std::vector<T> SortableArray<T>::Quicksort(std::vector<T> &array,int low,int high)
+{
+  int pivotPos=0;
+  if(low<high)
+  {
+    pivotPos= qsPartition(array,low,high);
+    Quicksort(array,low,pivotPos);
+    Quicksort(array,pivotPos+1,high);
+  }
+  return array;
+}
+
+template<typename T>
+int SortableArray<T>::qsPartition(std::vector<T> &array,int i, int k)
+{
+  int pivot=array[i];
+  int left=i;
+  
+  for(int j=i+1;j<k;j++)
+  {
+    if(array[j]<pivot)
+    {
+      left++;
+      swap(array[j],array[left]);
+    }
+  }
+  swap(array[i],array[left]);
+  return left;
+}
+
+template <typename T>
+std::vector<T> SortableArray<T>::Quicksort_opt(std::vector<T> array)
+{
+  if(array.size()< _SMALL_ARRAY_SIZE)
+    return InsertionSort(array);
+  return Quicksort_opt(array,0,array.size());
+}
+
+template <typename T>
+std::vector<T> SortableArray<T>::Quicksort_opt(std::vector<T> &array,int low,int high)
+{
+  int size=high-low;
+  if(size < _SMALL_ARRAY_SIZE)
+  {
+    InsertionSort(array,low,high);
+    return array;
+  }
+  std::pair<int,int> pivotPos;
+  if(low<high)
+  {
+    pivotPos= qsPartition_opt(array,low,high);
+    Quicksort_opt(array,low,std::get<0>(pivotPos));
+    Quicksort_opt(array,std::get<1>(pivotPos),high);
+  }
+  return array;
+}
+
+template<typename T>
+std::pair<int,int> SortableArray<T>::qsPartition_opt(std::vector<T> &array,int i, int k)
+{
+  int pivotIdx=i+(k-i)/2;
+  T pivot=array[pivotIdx];
+  int left=i;
+  int right=k-1;
+  int aux;
+  for(int j=i;j<=right;j++)
+  {
+    if(m_fLThan(array[j],pivot))
+    {
+      if(j>left)
+      {
+	swap(array[j],array[left++]);
+	j--;
+      }
+      else
+	left++;
+      
+    }
+    else if(m_fLThan(pivot,array[j]))
+    {
+      swap(array[j],array[right]);
+      right--;
+      j--;
+    }
+  }
+  return std::pair<int,int>(left,right);
+}
+
+template <typename T>
+std::vector<T> SortableArray<T>::MergeSort(std::vector<T> array)
 {
   if(static_cast<unsigned int>(array.size())==0)
-    {
-      std::vector<T> res;
-      return res;
-    }
+  {
+    std::vector<T> res;
+    return res;
+  }
   if(static_cast<unsigned int>(array.size())==1)
     return array;
   unsigned int mid=static_cast<unsigned int>(array.size()/2);
-  unsigned int rest=static_cast<unsigned int>(array.size()-mid);
-  std::vector<T> leftVec(mid);
-  std::vector<T> rightVec(rest);
-  for (int i=0; i<mid;i++)
-  {
-    leftVec[i]=array[i];
-    if(i<rest)
-      rightVec[i]=array[mid+i];
-  }
-  leftVec=mergeSort(leftVec);
-  rightVec=mergeSort(rightVec);
+    
+  std::vector<T> leftVec(&array[0],&array[mid]);
+  std::vector<T> rightVec(&array[mid],&array[array.size()]);
+
+  leftVec=MergeSort(leftVec);
+  rightVec=MergeSort(rightVec);
   return merge(leftVec,rightVec);
+}
+
+template <typename T>
+std::vector<T> SortableArray<T>::InsertionSort(std::vector<T> array)
+{
+  for(int i=0; i<array.size(); i++)
+  {
+    T key=array[i];
+    int j=i;
+    while ((j > 0) && m_fLThan(key,array[j-1]))
+    {
+      array[j]=array[j-1];
+      j=j-1;
+    }
+    array[j]=key;
+  }
+  return array;
+}
+
+template <typename T>
+void SortableArray<T>::swap(T& a, T& b)
+{
+  T aux=a;
+  a=b;
+  b=aux;
+}
+template <typename T>
+void SortableArray<T>::InsertionSort(std::vector<T> &array,int low,int high)
+{
+  for(int i=low; i<high; i++)
+  {
+    T key=array[i];
+    int j=i;
+    while ((j > 0) && m_fLThan(key,array[j-1]))
+    {
+      array[j]=array[j-1];
+      j=j-1;
+    }
+    array[j]=key;
+  }
 }
