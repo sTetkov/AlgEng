@@ -13,12 +13,12 @@
 #include <functional>
 #include "cMeterDataDump.h"
 #include "cCPUMeterFunctions.h"
-#include "cSortableArray.h"
+#include "sorting.h"
+#include "sorting.cpp"
 
 ///Ugly but at the moment necessary to allow the compilation of templates
 #include "cMeter.cpp"
 #include "cMeterDataDump.cpp"
-#include "cSortableArray.cpp"
 #include <chrono>
 #include <algorithm>
 
@@ -31,7 +31,7 @@
 #define _MAX_FIB_NUMBER 93
 #define _MAX_FIB_NUMBER_DERIVED_FUNCTION 76
 #define _RND_NUMBER_GEN_SEED 42
-#define _MAX_VECTOR_SIZE_NUMBER 6000
+#define _MAX_VECTOR_SIZE_NUMBER 200
 #define _MAX_VECTOR_STEP_INCREASE 10
 #define _VECTOR_TEST_PER_BATCH 5
 #define _CPU_CYCLES_MEASUREMENT "CPU_cycles"
@@ -134,7 +134,7 @@ unsigned long fibonacciArray(unsigned int n)
     unsigned long *piVec=new unsigned long[n];
     piVec[0]=0;
     piVec[1]=1;
-    for (int i=2;i<n;i++)
+    for (unsigned int i=2;i<n;i++)
         piVec[i]=piVec[i-1]+piVec[i-2];
     unsigned long ret=piVec[n-1]+piVec[n-2];
     delete[] piVec;
@@ -170,7 +170,7 @@ unsigned long fibonacciConst(unsigned int n)
     unsigned long fib1=0;
     unsigned long fib2=1;
     unsigned long ret=0;
-    for (int i=2;i<n+1;i++)
+    for (unsigned int i=2;i<n+1;i++)
     {
         ret=fib1+fib2;
         fib1=fib2;
@@ -341,7 +341,7 @@ TEST (FibonacciTest,fibonacciCompileTimeBuildTableFunction)
 
 void generateFibonacciLookUpTable(unsigned int n)
 {
-  for (int i=0;i<(n+1);i++)
+  for (unsigned int i=0;i<(n+1);i++)
     fibLookupTable[i]=fibonacciConst(i);
 }
 
@@ -468,15 +468,7 @@ TEST (FibonacciTest,fibonacciExpByConstMemSquareFunction)
 
 void initializeMeterFunctions()
 {
-    /*stopWatchFunc=clock;
-    stopWatch=new cMeter<clock_t>(stopWatchFunc);
-    stopWatch->setUnitName("time_us");
-    stopWatch->setUnitSymbol("us");
-    stopWatchDataDump=new cMeterDataDump<clock_t>(stopWatch);
-    /*Losing too much precision during the convertion
-    auto func=[] (clock_t val){return ((static_cast<float>(val))/CLOCKS_PER_SEC)*1000000;};
-    stopWatchDataDump->setConversionFunction(func);*/
-   
+  
     stopWatchFunc =[] (){
       auto now = std::chrono::high_resolution_clock::now();
       uint64_t nanos = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count());
@@ -806,174 +798,145 @@ std::string generateFileName(std::string MeasurementType, std::string attributes
 
 ///As for the moment I need to include the cpp, it became necessary to move the functional tests here
 #ifdef TEST_RUN
+
+void SortedVectorAssert(std::vector<int> v)
+{
+  if(v.size()==0)
+    return;
+  for (size_t i=0;i<(v.size()-1);i++)
+    ASSERT_LE(v[i],v[i+1]);  
+}
+
 TEST (SortableArrayTest,InsertionSortFunctionalTest)
 {
   std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,0);
   std::vector<int> v;
-  SortableArray<int> sa(toSort);
-  sa.setElementsAreComparable();
 
-  v=sa.InsertionSort(toSort);
+  v=Insertionsort(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,1);
-  v=sa.InsertionSort(toSort);
+  v=Insertionsort(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,2);
-  v=sa.InsertionSort(toSort);
+  v=Insertionsort(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,3);
-  v=sa.InsertionSort(toSort);
+  v=Insertionsort(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,10);
-  v=sa.InsertionSort(toSort);
+  v=Insertionsort(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
 }
-#endif // TEST_RUN
 
-
-#ifdef TEST_RUN
 TEST (SortableArrayTest,QuickSortFunctionalTest)
 {
   std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,0);
   std::vector<int> v;
-  SortableArray<int> sa(toSort);
-  sa.setElementsAreComparable();
+  
+  v=Quicksort(toSort);
 
-  v=sa.Quicksort(toSort);
-
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,1);
-  v=sa.Quicksort(toSort);
+  v=Quicksort(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,2);
-  v=sa.Quicksort(toSort);
+  v=Quicksort(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,3);
-  v=sa.Quicksort(toSort);
+  v=Quicksort(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,10);
-  v=sa.Quicksort(toSort);
+  v=Quicksort(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
   
 }
-#endif // TEST_RUN
 
-#ifdef TEST_RUN
 TEST (SortableArrayTest,QuickSortOptFunctionalTest)
 {
   std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,0);
   std::vector<int> v;
-  SortableArray<int> sa(toSort);
-  sa.setElementsAreComparable();
 
-  v=sa.Quicksort_opt(toSort);
+  v=Quicksort_opt(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,1);
-  v=sa.Quicksort_opt(toSort);
+  v=Quicksort_opt(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,2);
-  v=sa.Quicksort_opt(toSort);
+  v=Quicksort_opt(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,3);
-  v=sa.Quicksort_opt(toSort);
+  v=Quicksort_opt(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,10);
-  v=sa.Quicksort_opt(toSort);
+  v=Quicksort_opt(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
   
-    toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,100);
-  v=sa.Quicksort_opt(toSort);
-
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,100);
+  v=Quicksort_opt(toSort);
+  
+  SortedVectorAssert(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,400);
-  v=sa.Quicksort_opt(toSort);
-
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  v=Quicksort_opt(toSort);
+  
+  SortedVectorAssert(v);
   
 }
-#endif // TEST_RUN
 
-#ifdef TEST_RUN
 TEST (SortableArrayTest,MergeSortFunctionalTest)
 {
   std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,0);
   std::vector<int> v;
-  SortableArray<int> sa(toSort);
-  sa.setElementsAreComparable();
 
-  v=sa.MergeSort(toSort);
+  v=Mergesort(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  SortedVectorAssert(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,1);
-  v=sa.MergeSort(toSort);
-
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  v=Mergesort(toSort);
   
-  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,2);
-  v=sa.MergeSort(toSort);
+  SortedVectorAssert(v);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,2);
+  v=Mergesort(toSort);
+
+  SortedVectorAssert(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,3);
-  v=sa.MergeSort(toSort);
-
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
+  v=Mergesort(toSort);
   
+  SortedVectorAssert(v);
+
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,10);
-  v=sa.MergeSort(toSort);
+  v=Mergesort(toSort);
 
-  for (int i=0;i<static_cast<int>(v.size()-1);i++)
-    ASSERT_LE(v[i],v[i+1]);
-  
+  SortedVectorAssert(v);
 }
 #endif // TEST_RUN
 
@@ -999,11 +962,9 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
     arrayTypes.push_back(std::string(_SCRAMBLED_ARRAY));
     arrayTypes.push_back(std::string(_REPEATED_ELEMENTS_ARRAY));
     
-     SortableArray<int> sa;
-     sa.setElementsAreComparable();
-     std::vector<int> res;
+    std::vector<int> res;
      
-    for(int k=0; k<static_cast<int>(arrayTypes.size()); k++)
+    for(size_t k=0; k<arrayTypes.size(); k++)
     {
       stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"InsertionSort"));
       for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
@@ -1013,7 +974,7 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
 	  for(int j=0;j<testPerBatch;j++)
 	  {
 	      stopWatchDataDump->StartMeter();
-	      res=sa.InsertionSort(toSort);
+	      res=Insertionsort(toSort);
 	      stopWatchDataDump->StopMeter();
 	  }
 	  stopWatchDataDump->StoreBatch();
@@ -1028,7 +989,7 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
 	  for(int j=0;j<testPerBatch;j++)
 	  {
 	      stopWatchDataDump->StartMeter();
-	      res=sa.Quicksort(toSort);
+	      res=Quicksort(toSort);
 	      stopWatchDataDump->StopMeter();
 	  }
 	  stopWatchDataDump->StoreBatch();
@@ -1043,7 +1004,7 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
 	  for(int j=0;j<testPerBatch;j++)
 	  {
 	      stopWatchDataDump->StartMeter();
-	      res=sa.Quicksort_opt(toSort);
+	      res=Quicksort_opt(toSort);
 	      stopWatchDataDump->StopMeter();
 	  }
 	  stopWatchDataDump->StoreBatch();
@@ -1058,7 +1019,7 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
 	  for(int j=0;j<testPerBatch;j++)
 	  {
 	      stopWatchDataDump->StartMeter();
-	      res=sa.MergeSort(toSort);
+	      res=Mergesort(toSort);
 	      stopWatchDataDump->StopMeter();
 	  }
 	  stopWatchDataDump->StoreBatch();
@@ -1111,12 +1072,10 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
   arrayTypes.push_back(std::string(_REVERSE_SORTED_ARRAY));
   arrayTypes.push_back(std::string(_SCRAMBLED_ARRAY));
   arrayTypes.push_back(std::string(_REPEATED_ELEMENTS_ARRAY));
-  
-  SortableArray<int> sa;
-  sa.setElementsAreComparable();
+
   std::vector<int> res;
   
-  for(int k=0; k<static_cast<int>(arrayTypes.size()); k++)
+  for(size_t k=0; k<arrayTypes.size(); k++)
   {
    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"InsertionSort"));
     for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
@@ -1125,7 +1084,7 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
         for(int j=0;j<testPerBatch;j++)
 	{
 	      cpuCycleDataDump->StartMeter();
-	      res=sa.InsertionSort(toSort);
+	      res=Insertionsort(toSort);
 	      cpuCycleDataDump->StopMeter();
         }
         cpuCycleDataDump->StoreBatch();
@@ -1140,7 +1099,7 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
         for(int j=0;j<testPerBatch;j++)
 	{
 	      cpuCycleDataDump->StartMeter();
-	      res=sa.Quicksort(toSort);
+	      res=Quicksort(toSort);
 	      cpuCycleDataDump->StopMeter();
         }
         cpuCycleDataDump->StoreBatch();
@@ -1155,7 +1114,7 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
         for(int j=0;j<testPerBatch;j++)
 	{
 	      cpuCycleDataDump->StartMeter();
-	      res=sa.Quicksort_opt(toSort);
+	      res=Quicksort_opt(toSort);
 	      cpuCycleDataDump->StopMeter();
         }
         cpuCycleDataDump->StoreBatch();
@@ -1170,7 +1129,7 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
         for(int j=0;j<testPerBatch;j++)
 	{
 	      cpuCycleDataDump->StartMeter();
-	      res=sa.MergeSort(toSort);
+	      res=Mergesort(toSort);
 	      cpuCycleDataDump->StopMeter();
         }
         cpuCycleDataDump->StoreBatch();
