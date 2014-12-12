@@ -938,6 +938,36 @@ TEST (SortableArrayTest,MergeSortFunctionalTest)
 
   SortedVectorAssert(v);
 }
+
+TEST (SortableArrayTest,HeapSortFunctionalTest)
+{
+  std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,0);
+  std::vector<int> v;
+
+  v=Heapsort(toSort);
+
+  ASSERT_EQ(isHeap(v),true);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,1);
+  v=Heapsort(toSort);
+  
+  ASSERT_EQ(isHeap(v),true);
+
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,2);
+  v=Heapsort(toSort);
+
+  ASSERT_EQ(isHeap(v),true);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,3);
+  v=Heapsort(toSort);
+  
+  ASSERT_EQ(isHeap(v),true);
+
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,10);
+  v=Heapsort(toSort);
+
+  ASSERT_EQ(isHeap(v),true);
+}
 #endif // TEST_RUN
 
 
@@ -1057,6 +1087,21 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
       stopWatchDataDump->dumpData();
       stopWatchDataDump->resetData();
       
+      stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"Heapsort"));
+      for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
+      {
+	std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
+	  for(int j=0;j<testPerBatch;j++)
+	  {
+	      stopWatchDataDump->StartMeter();
+	      res=Heapsort(toSort);
+	      stopWatchDataDump->StopMeter();
+	  }
+	  stopWatchDataDump->StoreBatch();
+      }
+      stopWatchDataDump->dumpData();
+      stopWatchDataDump->resetData();
+      
     }
 }
 #endif
@@ -1163,6 +1208,22 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
 	    std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
 	    cpuCycleDataDump->StartMeter();
 	    std::sort(toSort.begin(),toSort.end());
+	    cpuCycleDataDump->StopMeter();
+        }
+        cpuCycleDataDump->StoreBatch();
+    }
+    cpuCycleDataDump->dumpData();
+    cpuCycleDataDump->resetData();
+    
+    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"Heapsort"));
+        
+    for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
+    {
+        for(int j=0;j<testPerBatch;j++)
+	{
+	    std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
+	    cpuCycleDataDump->StartMeter();
+	    res=Heapsort(toSort);
 	    cpuCycleDataDump->StopMeter();
         }
         cpuCycleDataDump->StoreBatch();
