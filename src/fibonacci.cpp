@@ -22,17 +22,17 @@
 #include <chrono>
 #include <algorithm>
 
+#include <random>
+
 #ifdef TEST_RUN
 #include "gtest/gtest.h"
-#include <random>
 #endif
-
 
 #define _MAX_FIB_NUMBER 93
 #define _MAX_FIB_NUMBER_DERIVED_FUNCTION 76
 #define _RND_NUMBER_GEN_SEED 42
-#define _MAX_VECTOR_SIZE_NUMBER 200
-#define _MAX_VECTOR_STEP_INCREASE 10
+#define _MAX_VECTOR_SIZE_NUMBER 8000
+#define _MAX_VECTOR_STEP_INCREASE 100
 #define _VECTOR_TEST_PER_BATCH 5
 #define _CPU_CYCLES_MEASUREMENT "CPU_cycles"
 #define _TIME_UNITS_MEASUREMENT "Time_nanosecs"
@@ -711,7 +711,6 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsCPUCycles)
 }
 #endif
 
-#ifdef TEST_RUN
 std::vector<int> generateRandomVector(int seed, int size)
 {
     std::mt19937 gen;
@@ -794,7 +793,6 @@ std::string generateFileName(std::string MeasurementType, std::string attributes
   return res;
   
 }
-#endif
 
 ///As for the moment I need to include the cpp, it became necessary to move the functional tests here
 #ifdef TEST_RUN
@@ -939,6 +937,36 @@ TEST (SortableArrayTest,MergeSortFunctionalTest)
   SortedVectorAssert(v);
 }
 
+TEST (SortableArrayTest,MergeSortCompactMemoryFunctionalTest)
+{
+  std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,0);
+  std::vector<int> v;
+
+  v=Mergesort_cMem(toSort);
+
+  SortedVectorAssert(v);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,1);
+  v=Mergesort_cMem(toSort);
+  
+  SortedVectorAssert(v);
+
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,2);
+  v=Mergesort_cMem(toSort);
+
+  SortedVectorAssert(v);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,3);
+  v=Mergesort_cMem(toSort);
+  
+  SortedVectorAssert(v);
+
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,10);
+  v=Mergesort_cMem(toSort);
+
+  SortedVectorAssert(v);
+}
+
 TEST (SortableArrayTest,HeapSortFunctionalTest)
 {
   std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,0);
@@ -996,6 +1024,7 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
      
     for(size_t k=0; k<arrayTypes.size(); k++)
     {
+      /*
       stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"InsertionSort"));
       for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
       {
@@ -1026,7 +1055,7 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
       }
       stopWatchDataDump->dumpData();
       stopWatchDataDump->resetData();
-      
+      */
       stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"quicksort_opt"));
       for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
       {
@@ -1050,6 +1079,21 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
 	  {
 	      stopWatchDataDump->StartMeter();
 	      res=Mergesort(toSort);
+	      stopWatchDataDump->StopMeter();
+	  }
+	  stopWatchDataDump->StoreBatch();
+      }
+      stopWatchDataDump->dumpData();
+      stopWatchDataDump->resetData();
+      
+            stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"mergesort_compactMem"));
+      for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
+      {
+	std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
+	  for(int j=0;j<testPerBatch;j++)
+	  {
+	      stopWatchDataDump->StartMeter();
+	      res=Mergesort_cMem(toSort);
 	      stopWatchDataDump->StopMeter();
 	  }
 	  stopWatchDataDump->StoreBatch();
@@ -1086,7 +1130,7 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
       }
       stopWatchDataDump->dumpData();
       stopWatchDataDump->resetData();
-      
+      /*
       stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"Heapsort"));
       for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
       {
@@ -1100,7 +1144,7 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
 	  stopWatchDataDump->StoreBatch();
       }
       stopWatchDataDump->dumpData();
-      stopWatchDataDump->resetData();
+      stopWatchDataDump->resetData();*/
       
     }
 }
@@ -1122,6 +1166,7 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
   
   for(size_t k=0; k<arrayTypes.size(); k++)
   {
+    /*
    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"InsertionSort"));
     for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
     {
@@ -1151,7 +1196,7 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
     }
     cpuCycleDataDump->dumpData();
     cpuCycleDataDump->resetData();
-    
+    */
     cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"quicksort_opt"));
     for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
     {
@@ -1181,6 +1226,22 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
     }
     cpuCycleDataDump->dumpData();
     cpuCycleDataDump->resetData();
+    
+    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"mergesort_compactMem"));
+    for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
+    {
+      std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
+        for(int j=0;j<testPerBatch;j++)
+	{
+	      cpuCycleDataDump->StartMeter();
+	      res=Mergesort_cMem(toSort);
+	      cpuCycleDataDump->StopMeter();
+        }
+        cpuCycleDataDump->StoreBatch();
+    }
+    cpuCycleDataDump->dumpData();
+    cpuCycleDataDump->resetData();
+    
     
     cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"qsort"));
     
@@ -1214,7 +1275,7 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
     }
     cpuCycleDataDump->dumpData();
     cpuCycleDataDump->resetData();
-    
+    /*
     cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"Heapsort"));
         
     for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
@@ -1229,7 +1290,7 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
         cpuCycleDataDump->StoreBatch();
     }
     cpuCycleDataDump->dumpData();
-    cpuCycleDataDump->resetData();
+    cpuCycleDataDump->resetData();*/
   }
 }
 #endif

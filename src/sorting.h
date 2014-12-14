@@ -50,57 +50,6 @@ void Insertionsort(std::vector<T> &array,size_t low,size_t high, std::function<b
   }
 }
 
-template <typename T>
-std::vector<T> merge(std::vector<T> left, std::vector<T> right, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
-{
-  std::vector<T> res;
-  size_t i=0;
-  size_t j=0;
-  for(size_t n=0;n<left.size()+right.size();n++)
-  {
-    if(i>=left.size())
-      res.push_back(right[j++]);
-    else if(j>=right.size())
-      res.push_back(left[i++]);
-    else if (m_fLThan(left[i],right[j]))
-      res.push_back(left[i++]);
-    else
-      res.push_back(right[j++]);
-  }
-  return res;	
-}
-
-template<typename T>
-size_t qsPartition(std::vector<T> &array,size_t i, size_t k, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
-{
-  T pivot=array[i];
-  size_t left=i;
-  
-  for(size_t j=i+1;j<k;j++)
-  {
-    if(m_fLThan(array[j],pivot))
-    {
-      left++;
-      swap(array[j],array[left]);
-    }
-  }
-  swap(array[i],array[left]);
-  return left;
-}
-
-template <typename T>
-std::vector<T> Quicksort(std::vector<T> &array,size_t low,size_t high, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
-{
-  size_t pivotPos=0;
-  if(low<high)
-  {
-    pivotPos= qsPartition(array,low,high,m_fLThan);
-    Quicksort(array,low,pivotPos,m_fLThan);
-    Quicksort(array,pivotPos+1,high,m_fLThan);
-  }
-  return array;
-}
-
 template<typename T>
 std::pair<size_t,size_t> qsPartition_opt(std::vector<T> &array,size_t i, size_t k, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
 {
@@ -160,14 +109,29 @@ std::vector<T> Quicksort_opt(std::vector<T> array, std::function<bool(T,T)> m_fL
 }
 
 template <typename T>
+std::vector<T> merge(std::vector<T> left, std::vector<T> right, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+{
+  std::vector<T> res;
+  size_t i=0;
+  size_t j=0;
+  for(size_t n=0;n<left.size()+right.size();n++)
+  {
+    if(i>=left.size())
+      res.push_back(right[j++]);
+    else if(j>=right.size())
+      res.push_back(left[i++]);
+    else if (m_fLThan(left[i],right[j]))
+      res.push_back(left[i++]);
+    else
+      res.push_back(right[j++]);
+  }
+  return res;	
+}
+
+template <typename T>
 std::vector<T> Mergesort(std::vector<T> array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
 {
-  if(array.size()==0)
-  {
-    std::vector<T> res;
-    return res;
-  }
-  if(array.size()==1)
+  if(array.size()<=1)
     return array;
   size_t mid=array.size()/2;
     
@@ -179,12 +143,42 @@ std::vector<T> Mergesort(std::vector<T> array, std::function<bool(T,T)> m_fLThan
   return merge(leftVec,rightVec,m_fLThan);
 }
 
+template<typename T>
+size_t qsPartition(std::vector<T> &array,size_t i, size_t k, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+{
+  T pivot=array[i];
+  size_t left=i;
+  
+  for(size_t j=i+1;j<k;j++)
+  {
+    if(m_fLThan(array[j],pivot))
+    {
+      left++;
+      swap(array[j],array[left]);
+    }
+  }
+  swap(array[i],array[left]);
+  return left;
+}
 
 template <typename T>
-std::vector<T> Quicksort(std::vector<T> array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+std::vector<T> Quicksort(std::vector<T> &array,size_t low,size_t high, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
 {
-  Quicksort(array,0,array.size(),m_fLThan);
+  size_t pivotPos=0;
+  if(low<high)
+  {
+    pivotPos= qsPartition(array,low,high,m_fLThan);
+    Quicksort(array,low,pivotPos,m_fLThan);
+    Quicksort(array,pivotPos+1,high,m_fLThan);
+  }
   return array;
+}
+
+
+template <typename T>
+std::vector<T> Quicksort(std::vector<T> &array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+{
+  return Quicksort(array,0,array.size(),m_fLThan);
 }
 
 size_t pIndex(size_t i)
@@ -206,7 +200,6 @@ size_t rIndex(size_t i)
 template <typename T>
 bool isHeap(std::vector<T> array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
 {
-  int* aux=array.data();
   if (array.size()==0) return true;
   for (size_t i=(array.size()-1);  i>0; i--)
     if( m_fLThan(array[i],array[pIndex(i)]) ) return false;
@@ -219,7 +212,6 @@ std::vector<T> Heapify(std::vector<T> array, std::function<bool(T,T)> m_fLThan=[
   if(array.size()==0) return array;
   for (size_t i=(array.size()-1); i>0; i--)
   {
-    size_t pIdx=pIndex(i);
     if( m_fLThan(array[i],array[pIndex(i)]) ) swap(array[i],array[pIndex(i)]);
   }
   return array;
@@ -247,11 +239,10 @@ void siftUp(std::vector<T> &array, std::function<bool(T,T)> m_fLThan=[](T a,T b)
 template<typename T>
 void siftDown(std::vector<T> &array, size_t lim, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
 {
-  if(array.size()==0 | lim==0) return;
+  if((array.size()==0) | (lim==0)) return;
   size_t end=pIndex(lim);
   for(size_t i=0; i<=end; i++)
   {
-    size_t r=rIndex(i);
     if(m_fLThan(array[lIndex(i)],array[i])) swap(array[lIndex(i)],array[i]);
     if(rIndex(i)>lim) return;
     if(m_fLThan(array[rIndex(i)],array[i])) swap(array[rIndex(i)],array[i]);
@@ -266,6 +257,61 @@ std::vector<T> Heapsort(std::vector<T> array, std::function<bool(T,T)> m_fLThan=
   for(size_t i=array.size()-1; i>0; i--)
     siftDown(array,i,m_fLThan);
   return array;
+}
+
+template <typename T>
+std::vector<T> merge_cMem(std::vector<T> left,std::vector<T> right, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+{
+  size_t i=0;
+  size_t j=0;
+
+  std::vector<T> aux(left.size()+right.size());
+
+  for(size_t n=0;n<aux.size();n++)
+  {
+    if(i>=left.size())
+      aux[n]=right[j++];
+    else if(j>=right.size())
+      aux[n]=left[i++];
+    else if (m_fLThan(left[i],right[j]))
+      aux[n]=left[i++];
+    else
+      aux[n]=right[j++];
+  }
+  return aux;	
+}
+
+template <typename T>
+std::vector<T> Mergesort_cMem(std::vector<T> &array, size_t start, size_t end, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+{
+  if ((end-start)<=_SMALL_ARRAY_SIZE)
+  {
+    std::vector<T> res(array[start],array[end-1]);
+    Insertionsort<T>(res);
+    return res;
+  }
+  size_t mid=(end-start)/2;
+    
+  std::vector<T> left=Mergesort_cMem(array,start,start+mid,m_fLThan);
+  std::vector<T> right=Mergesort_cMem(array,start+mid,end,m_fLThan);
+  return merge_cMem(left,right,m_fLThan);
+}
+
+template <typename T>
+std::vector<T> Mergesort_cMem(std::vector<T> &array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+{
+  if(array.size()<=1)
+    return array;
+  if (array.size()<=_SMALL_ARRAY_SIZE)
+  {
+    return Insertionsort<T>(array);
+  }
+  
+  size_t mid=array.size()/2;
+    
+  std::vector<T> left=Mergesort_cMem(array,0,mid,m_fLThan);
+  std::vector<T> right=Mergesort_cMem(array,mid,array.size(),m_fLThan);
+  return merge_cMem(left,right,m_fLThan);
 }
 
 #endif 
