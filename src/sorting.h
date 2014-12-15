@@ -5,6 +5,7 @@
 #include <functional>
 #include <utility>
 #include <assert.h>.
+#include <random>
 
 static const size_t _SMALL_ARRAY_SIZE = 80;
 
@@ -51,9 +52,10 @@ void Insertionsort(std::vector<T> &array,size_t low,size_t high, std::function<b
 }
 
 template<typename T>
-std::pair<size_t,size_t> qsPartition_opt(std::vector<T> &array,size_t i, size_t k, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+std::pair<size_t,size_t> qsPartition_opt(std::vector<T> &array,size_t i, size_t k,std::mt19937 gen ,std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
 {
-  size_t pivotIdx=i+(k-i)/2;
+  std::uniform_int_distribution<size_t> dis(i, k-1);
+  size_t pivotIdx=dis(gen);
   T pivot=array[pivotIdx];
   size_t left=i;
   size_t right=k-1;
@@ -82,7 +84,7 @@ std::pair<size_t,size_t> qsPartition_opt(std::vector<T> &array,size_t i, size_t 
 
 
 template <typename T>
-std::vector<T> Quicksort_opt(std::vector<T> &array,size_t low,size_t high, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+std::vector<T> Quicksort_opt(std::vector<T> &array, size_t low,size_t high, std::mt19937 gen, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
 {
   size_t size=high-low;
   if(size < _SMALL_ARRAY_SIZE)
@@ -93,9 +95,9 @@ std::vector<T> Quicksort_opt(std::vector<T> &array,size_t low,size_t high, std::
   std::pair<size_t,size_t> pivotPos;
   if(low<high)
   {
-    pivotPos= qsPartition_opt(array,low,high,m_fLThan);
-    Quicksort_opt(array,low,std::get<0>(pivotPos),m_fLThan);
-    Quicksort_opt(array,std::get<1>(pivotPos),high,m_fLThan);
+    pivotPos= qsPartition_opt(array,low,high,gen,m_fLThan);
+    Quicksort_opt(array,low,std::get<0>(pivotPos),gen,m_fLThan);
+    Quicksort_opt(array,std::get<1>(pivotPos),high,gen,m_fLThan);
   }
   return array;
 }
@@ -105,7 +107,9 @@ std::vector<T> Quicksort_opt(std::vector<T> array, std::function<bool(T,T)> m_fL
 {
   if(array.size()< _SMALL_ARRAY_SIZE)
     return Insertionsort(array,m_fLThan);
-  return Quicksort_opt(array,0,array.size(),m_fLThan);
+  std::mt19937 gen;
+  gen.seed(42);
+  return Quicksort_opt(array,0,array.size(),gen,m_fLThan);
 }
 
 template <typename T>
