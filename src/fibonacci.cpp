@@ -15,6 +15,7 @@
 #include "cCPUMeterFunctions.h"
 #include "sorting.h"
 #include "sorting.cpp"
+#include "matrix.h"
 
 ///Ugly but at the moment necessary to allow the compilation of templates
 #include "cMeter.cpp"
@@ -45,17 +46,18 @@
 ///
 ///Prototypes
 ///
-unsigned long fibonacciRet(unsigned int);
-unsigned long fibonacciArray(unsigned int);
-unsigned long fibonacciConst(unsigned int);
-strcMatrix expBySquaring(unsigned int);
-unsigned long fibonacciExpBySquare(unsigned int);
-unsigned long fibonacciDerivedFormula(unsigned int);
-unsigned long fibonacciExpBySquareConsMem(unsigned int);
+unsigned long fibonacciRet(unsigned long);
+unsigned long fibonacciArray(unsigned long);
+unsigned long fibonacciConst(unsigned long);
+strcMatrix expBySquaring(unsigned long);
+unsigned long fibonacciExpBySquare(unsigned long);
+unsigned long fibonacciDerivedFormula(unsigned long);
+unsigned long fibonacciExpBySquareConsMem(unsigned long);
+unsigned long fibonacciExpBySquareConsMemSimplified(unsigned long);
 void initializeMeterFunctions();
 
-void generateFibonacciLookUpTable(unsigned int);
-unsigned long getLookUpTableFibonacciValue(unsigned int);
+void generateFibonacciLookUpTable(unsigned long);
+unsigned long getLookUpTableFibonacciValue(unsigned long);
 unsigned long fibLookupTable[94];
 
 #ifdef TEST_RUN
@@ -94,13 +96,13 @@ int main(
 ///
 ///This algorithm, while quite straightforward, is extremely inefficient, having a runtime of 2^n and a similar
 ///memory usage.
-unsigned long fibonacciRet(unsigned int n)
+unsigned long fibonacciRet(unsigned long n)
 {
     #ifdef TEST_RUN
     EXPECT_LE(n,_MAX_FIB_NUMBER)<< "A excessive value" << n << "was passed to fibonacciRet" ;
     #endif
     if(n<2)
-        return static_cast<unsigned long>(n);
+        return n;
     return fibonacciRet(n-1)+fibonacciRet(n-2);
 }
 
@@ -124,13 +126,13 @@ TEST (FibonacciTest,FibonacciRecursiveFunction)
 ///have a linear runtime and memory usage
 ///
 ///In this case we usa an array to store all intermediate values used for the calculation.
-unsigned long fibonacciArray(unsigned int n)
+unsigned long fibonacciArray(unsigned long n)
 {
     #ifdef TEST_RUN
     EXPECT_LE(n,_MAX_FIB_NUMBER)<< "A excessive value" << n << "was passed to fibonacciArray";
     #endif
     if(n<2)
-        return static_cast<unsigned long>(n);
+        return n;
     unsigned long *piVec=new unsigned long[n];
     piVec[0]=0;
     piVec[1]=1;
@@ -160,13 +162,13 @@ TEST (FibonacciTest,FibonacciArrayFunction)
 
 ///\brief This implements an algorithm for the calculation of the fibonacci number that has a
 ///linear runtime and a constant memory usage.
-unsigned long fibonacciConst(unsigned int n)
+unsigned long fibonacciConst(unsigned long n)
 {
     #ifdef TEST_RUN
     EXPECT_LE(n,_MAX_FIB_NUMBER)<< "A excessive value" << n << "was passed to fibonacciConst";
     #endif
     if (n<2)
-        return static_cast<unsigned long>(n);
+        return n;
     unsigned long fib1=0;
     unsigned long fib2=1;
     unsigned long ret=0;
@@ -199,7 +201,7 @@ TEST (FibonacciTest,FibonacciConstFunction)
 
 ///\brief Implements exponentiation by squaring for matrix | 0 | 1 |
 ///                                                        | 1 | 1 |
-strcMatrix expBySquaring(unsigned int n)
+strcMatrix expBySquaring(unsigned long n)
 {
     if(n>2)
     {
@@ -255,13 +257,13 @@ TEST (FibonacciTest,expBySquareFunction)
 
 ///\brief Claculates the n-th fibonacci number using matrixes and exponentiation by square in logarithmic time
 
-unsigned long fibonacciExpBySquare(unsigned int n)
+unsigned long fibonacciExpBySquare(unsigned long n)
 {
     #ifdef TEST_RUN
     EXPECT_LE(n,_MAX_FIB_NUMBER)<< "A excessive value" << n << "was passed to fibonacciExpBySquare";
     #endif
     if (n<2)
-        return static_cast<unsigned long>(n);
+        return n;
     strcMatrix m=expBySquaring(n);
     unsigned long ret=*m(0,1);
     return ret;
@@ -287,14 +289,14 @@ TEST (FibonacciTest,fibonacciExpBySquareFunction)
 
 ///\brief Calculates n-th fibonacci number using the derived formula in linear time.
 
-unsigned long fibonacciDerivedFormula(unsigned int n)
+unsigned long fibonacciDerivedFormula(unsigned long n)
 {
     #ifdef TEST_RUN
     EXPECT_LE(n,_MAX_FIB_NUMBER_DERIVED_FUNCTION)<< "A excessive value"<< n << "was passed to fibonacciDerivedFormula";
     #endif
     if (n<2)
-        return static_cast<unsigned long>(n);
-    unsigned long res=static_cast<unsigned long>(floor( (1/sqrt(5))*(pow(((1+sqrt(5))/2),n))+0.5f ));
+        return n;
+    unsigned long res=floor( (1/sqrt(5))*(pow(((1+sqrt(5))/2),n))+0.5f );
     return res;
 }
 #ifdef TEST_RUN
@@ -317,10 +319,10 @@ TEST (FibonacciTest,fibonacciDerivedFormulaFunction)
 ///\brief Is calculated on compile time. Uses ternary operator as it can
 ///       have only one return statement.
 ///       Usage found here: --> http://www.cprogramming.com/c++11/c++11-compile-time-processing-with-constexpr.html
-constexpr unsigned long fibonacciCompileTime (unsigned int n)
+constexpr unsigned long fibonacciCompileTime (unsigned long n)
 {
 
-    return n > 1 ? fibonacciConst(static_cast<int>(n)) : n;
+    return n > 1 ? fibonacciConst(n) : n;
 }
 
 #ifdef TEST_RUN
@@ -339,13 +341,13 @@ TEST (FibonacciTest,fibonacciCompileTimeBuildTableFunction)
 }
 #endif
 
-void generateFibonacciLookUpTable(unsigned int n)
+void generateFibonacciLookUpTable(unsigned long n)
 {
   for (unsigned int i=0;i<(n+1);i++)
     fibLookupTable[i]=fibonacciConst(i);
 }
 
-unsigned long getLookUpTableFibonacciValue(unsigned int n)
+unsigned long getLookUpTableFibonacciValue(unsigned long n)
 {
   #ifdef TEST_RUN
   EXPECT_LE(n,_MAX_FIB_NUMBER)<< "A excessive value"<< n << "was passed to getLookUpTableFibonacciValue";
@@ -355,13 +357,13 @@ unsigned long getLookUpTableFibonacciValue(unsigned int n)
 
 /// \brief: fibonacci number Exponentiation By Squaring using constant memory
 ///
-unsigned long fibonacciExpBySquareConsMem(unsigned int n)
+unsigned long fibonacciExpBySquareConsMem(unsigned long n)
 {
     #ifdef TEST_RUN
     EXPECT_LE(n,_MAX_FIB_NUMBER)<< "A excessive value" << n << "was passed to fibonacciExpBySquareConsMem";
     #endif
     if (n<2)
-        return static_cast<unsigned long>(n);
+        return n;
 
    //Until the matrix class is improved the multiplication requires some auxiliary matrixes to store values
    strcMatrix evenM;
@@ -446,7 +448,7 @@ unsigned long fibonacciExpBySquareConsMem(unsigned int n)
    unsigned long ret=*resM(0,1);
    return ret;  
 }
-
+/*
 #ifdef TEST_RUN
 TEST (FibonacciTest,fibonacciExpByConstMemSquareFunction)
 {
@@ -463,7 +465,91 @@ TEST (FibonacciTest,fibonacciExpByConstMemSquareFunction)
         ASSERT_EQ(fibonacciExpBySquareConsMem(10),55)<< "fibonacciExpBySquareConsMem returned "<<fibonacciExpBySquareConsMem(10)<< " instead of "<<55;
 }
 #endif
+*/
+/// \brief: fibonacci number Exponentiation By Squaring using constant memory
+///
+unsigned long fibonacciExpBySquareConsMemSimplified(unsigned long n)
+{
+    #ifdef TEST_RUN
+    EXPECT_LE(n,_MAX_FIB_NUMBER)<< "A excessive value" << n << "was passed to fibonacciExpBySquareConsMem";
+    #endif
+    if (n<2)
+        return n;
 
+   bool useOdd=false;
+   bool useEven=false;
+   bool oddFirst=false;
+   bool oddExp=false;
+   
+   simpleMatrix res;
+   res.init(0,1,1,1);
+   
+   simpleMatrix even;
+   even.init(0,1,1,1);
+   
+   simpleMatrix odd;
+   odd.init(0,1,1,1);
+   
+   while(n>1)
+   {    
+     if(n%2==0)
+     {
+	useEven=true;//There was some even squaring
+       	even=Multiply(even,even);
+	n/=2;
+     }
+     else
+     {
+       if(!useEven)//if the first exponent was odd I need to multiply an odd number of Matrixes
+	  oddFirst=true;
+       else
+       {
+	 oddExp=true; //if a later exponent was odd, I need to squar the odd number of matrixes
+	 odd=Multiply(odd,odd);
+       }
+       useOdd=true;
+       n--;
+     }
+   }
+   
+   if(oddFirst&&oddExp)//I multiply the odd matrixes with the base value [[0,1][1,1]] only if there was squaring, otherwise the oddMatrix already has the right value
+   {
+     simpleMatrix baseM;
+     baseM.init(0,1,1,1);
+     
+    odd=Multiply(baseM,odd);
+   }
+  
+   if(useOdd&&useEven)
+     res=Multiply(odd,even);
+   else if(useOdd)
+   {
+     res=odd;
+   }
+   else if(useEven)
+   {
+     res=even;
+   }
+   
+   return res._data[0][1];  
+}
+
+#ifdef TEST_RUN
+TEST (FibonacciTest,fibonacciExpByConstMemSquareSimplifiedFunction)
+{
+        ASSERT_EQ(fibonacciExpBySquareConsMemSimplified(0),0)<< "fibonacciExpBySquareConsMemSimplified returned "<<fibonacciExpBySquareConsMemSimplified(0)<< " instead of "<<0;
+        ASSERT_EQ(fibonacciExpBySquareConsMemSimplified(1),1)<< "fibonacciExpBySquareConsMemSimplified returned "<<fibonacciExpBySquareConsMemSimplified(1)<< " instead of "<<1;
+        ASSERT_EQ(fibonacciExpBySquareConsMemSimplified(2),1)<< "fibonacciExpBySquareConsMemSimplified returned "<<fibonacciExpBySquareConsMemSimplified(2)<< " instead of "<<1;
+        ASSERT_EQ(fibonacciExpBySquareConsMemSimplified(3),2)<< "fibonacciExpBySquareConsMemSimplified returned "<<fibonacciExpBySquareConsMemSimplified(3)<< " instead of "<<2;
+        ASSERT_EQ(fibonacciExpBySquareConsMemSimplified(4),3)<< "fibonacciExpBySquareConsMemSimplified returned "<<fibonacciExpBySquareConsMemSimplified(4)<< " instead of "<<3;
+        ASSERT_EQ(fibonacciExpBySquareConsMemSimplified(5),5)<< "fibonacciExpBySquareConsMemSimplified returned "<<fibonacciExpBySquareConsMemSimplified(5)<< " instead of "<<5;
+        ASSERT_EQ(fibonacciExpBySquareConsMemSimplified(6),8)<< "fibonacciExpBySquareConsMemSimplified returned "<<fibonacciExpBySquareConsMemSimplified(6)<< " instead of "<<8;
+        ASSERT_EQ(fibonacciExpBySquareConsMemSimplified(7),13)<< "fibonacciExpBySquareConsMemSimplified returned "<<fibonacciExpBySquareConsMemSimplified(7)<< " instead of "<<13;
+        ASSERT_EQ(fibonacciExpBySquareConsMemSimplified(8),21)<< "fibonacciExpBySquareConsMemSimplified returned "<<fibonacciExpBySquareConsMemSimplified(8)<< " instead of "<<21;
+        ASSERT_EQ(fibonacciExpBySquareConsMemSimplified(9),34)<< "fibonacciExpBySquareConsMemSimplified returned "<<fibonacciExpBySquareConsMemSimplified(9)<< " instead of "<<34;
+        ASSERT_EQ(fibonacciExpBySquareConsMemSimplified(10),55)<< "fibonacciExpBySquareConsMemSimplified returned "<<fibonacciExpBySquareConsMemSimplified(10)<< " instead of "<<55;
+}
+#endif
 
 
 void initializeMeterFunctions()
@@ -771,7 +857,7 @@ std::vector<int> generateRandomVector(int seed, int size, std::string distributi
     {
       std::mt19937 gen;
       gen.seed(seed);
-      int genRoof= static_cast<int>((size<100) ? size/10 : 10);
+      int genRoof= (size<100) ? size/10 : 10;
       std::uniform_int_distribution<> dis(0, genRoof);
       std::vector<int> res(size);
       for(int i=0; i<size;i++)
