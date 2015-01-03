@@ -337,7 +337,7 @@ std::vector<T> Mergesort_cMem(std::vector<T> &array, std::function<bool(T,T)> m_
     
   std::pair<T*,size_t> left=Mergesort_cMem(std::pair<T*,size_t>(array.data(),mid),m_fLThan);
   std::pair<T*,size_t> right=Mergesort_cMem(std::pair<T*,size_t>(&array.data()[mid],array.size()-mid),m_fLThan);
-  std::pair<T*,size_t> res=merge_cMem(left,right,m_fLThan);
+  merge_cMem(left,right,m_fLThan);
   return array;
 }
 

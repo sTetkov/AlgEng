@@ -32,7 +32,7 @@
 #define _MAX_FIB_NUMBER 93
 #define _MAX_FIB_NUMBER_DERIVED_FUNCTION 76
 #define _RND_NUMBER_GEN_SEED 42
-#define _MAX_VECTOR_SIZE_NUMBER 8000
+#define _MAX_VECTOR_SIZE_NUMBER 80000
 #define _MAX_VECTOR_STEP_INCREASE 100
 #define _VECTOR_TEST_PER_BATCH 5
 #define _CPU_CYCLES_MEASUREMENT "CPU_cycles"
@@ -43,6 +43,8 @@
 #define _SCRAMBLED_ARRAY "scrambled_array"
 #define _REPEATED_ELEMENTS_ARRAY "array_with_repeated_elements"
 #define _EMPTY_STRING ""
+
+#define STEP_INCREASE(arg) (arg/10+1)
 ///
 ///Prototypes
 ///
@@ -1149,7 +1151,7 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
       stopWatchDataDump->resetData();
       */
       stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"quicksort_opt"));
-      for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
+      for (int i=0; i<batchNumber; i+=STEP_INCREASE(i))
       {
 	std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
 	  for(int j=0;j<testPerBatch;j++)
@@ -1164,7 +1166,7 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
       stopWatchDataDump->resetData();
       
       stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"mergesort"));
-      for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
+      for (int i=0; i<batchNumber; i+=STEP_INCREASE(i))
       {
 	std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
 	  for(int j=0;j<testPerBatch;j++)
@@ -1179,7 +1181,7 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
       stopWatchDataDump->resetData();
       
             stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"mergesort_compactMem"));
-      for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
+      for (int i=0; i<batchNumber; i+=STEP_INCREASE(i))
       {
 	std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
 	  for(int j=0;j<testPerBatch;j++)
@@ -1194,7 +1196,7 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
       stopWatchDataDump->resetData();
       
       stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"qsort"));
-      for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
+      for (int i=0; i<batchNumber; i+=STEP_INCREASE(i))
       {
 	std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
 	  for(int j=0;j<testPerBatch;j++)
@@ -1209,7 +1211,7 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
       stopWatchDataDump->resetData();
       
       stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"sort"));
-      for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
+      for (int i=0; i<batchNumber; i+=STEP_INCREASE(i))
       {
 	std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
 	  for(int j=0;j<testPerBatch;j++)
@@ -1290,7 +1292,7 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
     cpuCycleDataDump->resetData();
     */
     cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"quicksort_opt"));
-    for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
+    for (int i=0; i<batchNumber; i+=STEP_INCREASE(i))
     {
       std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
         for(int j=0;j<testPerBatch;j++)
@@ -1305,7 +1307,7 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
     cpuCycleDataDump->resetData();
     
     cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"mergesort"));
-    for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
+    for (int i=0; i<batchNumber; i+=STEP_INCREASE(i))
     {
       std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
         for(int j=0;j<testPerBatch;j++)
@@ -1320,7 +1322,7 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
     cpuCycleDataDump->resetData();
     
     cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"mergesort_compactMem"));
-    for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
+    for (int i=0; i<batchNumber; i+=STEP_INCREASE(i))
     {
       std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
         for(int j=0;j<testPerBatch;j++)
@@ -1338,7 +1340,7 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
     cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"qsort"));
     
     
-    for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
+    for (int i=0; i<batchNumber; i+=STEP_INCREASE(i))
     {
         for(int j=0;j<testPerBatch;j++)
 	{
@@ -1354,7 +1356,7 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
     
     cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"sort"));
         
-    for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
+    for (int i=0; i<batchNumber; i+=STEP_INCREASE(i))
     {
         for(int j=0;j<testPerBatch;j++)
 	{
