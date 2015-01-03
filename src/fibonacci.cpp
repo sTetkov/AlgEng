@@ -448,7 +448,7 @@ unsigned long fibonacciExpBySquareConsMem(unsigned long n)
    unsigned long ret=*resM(0,1);
    return ret;  
 }
-/*
+
 #ifdef TEST_RUN
 TEST (FibonacciTest,fibonacciExpByConstMemSquareFunction)
 {
@@ -465,7 +465,7 @@ TEST (FibonacciTest,fibonacciExpByConstMemSquareFunction)
         ASSERT_EQ(fibonacciExpBySquareConsMem(10),55)<< "fibonacciExpBySquareConsMem returned "<<fibonacciExpBySquareConsMem(10)<< " instead of "<<55;
 }
 #endif
-*/
+
 /// \brief: fibonacci number Exponentiation By Squaring using constant memory
 ///
 unsigned long fibonacciExpBySquareConsMemSimplified(unsigned long n)
@@ -1048,6 +1048,12 @@ TEST (SortableArrayTest,MergeSortCompactMemoryFunctionalTest)
   SortedVectorAssert(v);
 
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,10);
+  v=Mergesort_cMem(toSort);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,100);
+  v=Mergesort_cMem(toSort);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,1000);
   v=Mergesort_cMem(toSort);
 
   SortedVectorAssert(v);

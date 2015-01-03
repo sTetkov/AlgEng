@@ -84,13 +84,13 @@ std::pair<size_t,size_t> qsPartition_opt(std::vector<T> &array,size_t i, size_t 
 
 
 template <typename T>
-std::vector<T> Quicksort_opt(std::vector<T> &array, size_t low,size_t high, std::mt19937 gen, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+void Quicksort_opt(std::vector<T> &array, size_t low,size_t high, std::mt19937 gen, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
 {
   size_t size=high-low;
   if(size < _SMALL_ARRAY_SIZE)
   {
     Insertionsort(array,low,high,m_fLThan);
-    return array;
+    return;
   }
   std::pair<size_t,size_t> pivotPos;
   if(low<high)
@@ -99,7 +99,6 @@ std::vector<T> Quicksort_opt(std::vector<T> &array, size_t low,size_t high, std:
     Quicksort_opt(array,low,std::get<0>(pivotPos),gen,m_fLThan);
     Quicksort_opt(array,std::get<1>(pivotPos),high,gen,m_fLThan);
   }
-  return array;
 }
 
 template <typename T>
@@ -109,7 +108,8 @@ std::vector<T> Quicksort_opt(std::vector<T> array, std::function<bool(T,T)> m_fL
     return Insertionsort(array,m_fLThan);
   std::mt19937 gen;
   gen.seed(42);
-  return Quicksort_opt(array,0,array.size(),gen,m_fLThan);
+  Quicksort_opt(array,0,array.size(),gen,m_fLThan);
+  return array;
 }
 
 template <typename T>
@@ -235,8 +235,7 @@ void siftUp(std::vector<T> &array, std::function<bool(T,T)> m_fLThan=[](T a,T b)
     if(!m_fLThan(array[newElemIdx],array[pIdx])) break;
     swap(array[pIdx],array[newElemIdx]);
     newElemIdx=pIdx;
-  }
-  
+  }  
   assert(isHeap(array,m_fLThan));
 }
 
@@ -264,43 +263,66 @@ std::vector<T> Heapsort(std::vector<T> array, std::function<bool(T,T)> m_fLThan=
 }
 
 template <typename T>
-std::vector<T> merge_cMem(std::vector<T> left,std::vector<T> right, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+std::pair<T*,size_t> merge_cMem(std::pair<T*,size_t> left,std::pair<T*,size_t> right, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
 {
   size_t i=0;
   size_t j=0;
 
-  std::vector<T> aux(left.size()+right.size());
-
-  for(size_t n=0;n<aux.size();n++)
+  T* aux=new T[left.second+right.second];
+  for(size_t n=0;n<left.second+right.second;n++)
   {
-    if(i>=left.size())
-      aux[n]=right[j++];
-    else if(j>=right.size())
-      aux[n]=left[i++];
-    else if (m_fLThan(left[i],right[j]))
-      aux[n]=left[i++];
+    if(i>=left.second)
+      aux[n]=right.first[j++];
+    else if(j>=right.second)
+      aux[n]=left.first[i++];
+    else if (m_fLThan(left.first[i],right.first[j]))
+      aux[n]=left.first[i++];
     else
-      aux[n]=right[j++];
+      aux[n]=right.first[j++];
   }
-  return aux;	
+  memcpy(left.first,aux,(left.second+right.second)*sizeof(T));
+  delete[] aux;
+  return std::pair<T*,size_t>(left.first,left.second+right.second);	
 }
 
 template <typename T>
-std::vector<T> Mergesort_cMem(std::vector<T> &array, size_t start, size_t end, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+std::pair<T*,size_t> Insertionsort(std::pair<T*,size_t> array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
 {
-  if ((end-start)<=_SMALL_ARRAY_SIZE)
+  for(size_t i=0; i<array.second; i++)
   {
-    std::vector<T> res(array[start],array[end-1]);
-    Insertionsort<T>(res);
-    return res;
+    T key=array.first[i];
+    size_t j=i;
+    while ((j > 0) && m_fLThan(key,array.first[j-1]))
+    {
+      array.first[j]=array.first[j-1];
+      j=j-1;
+    }
+    array.first[j]=key;
   }
-  size_t mid=(end-start)/2;
+  return array;
+}
+
+
+template <typename T>
+std::pair<T*,size_t> Mergesort_cMem(std::pair<T*,size_t> array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+{
+  if (array.second<=_SMALL_ARRAY_SIZE)
+  {
+    return Insertionsort<T>(array,m_fLThan);
+  }
+  size_t mid=(array.second)/2;
     
-  std::vector<T> left=Mergesort_cMem(array,start,start+mid,m_fLThan);
-  std::vector<T> right=Mergesort_cMem(array,start+mid,end,m_fLThan);
+  std::pair<T*,size_t> left=Mergesort_cMem(std::pair<T*,size_t>(array.first,mid),m_fLThan);
+  std::pair<T*,size_t> right=Mergesort_cMem(std::pair<T*,size_t>(&array.first[mid],array.second-mid),m_fLThan);
   return merge_cMem(left,right,m_fLThan);
 }
 
+
+///\brief: Mergesort using less memory and being faster
+///
+/// Mergesort that uses O(n+1) memory (the constant being the size defined in _SMALL_ARRAY_SIZE) passing around 
+/// Pairs of pointer+size. Runtime is still O(nlogn) but as it uses less memory allocation operations than the
+/// basic version, it runs very fast (Almost as fast as std::sort in most situtions)
 template <typename T>
 std::vector<T> Mergesort_cMem(std::vector<T> &array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
 {
@@ -313,9 +335,11 @@ std::vector<T> Mergesort_cMem(std::vector<T> &array, std::function<bool(T,T)> m_
   
   size_t mid=array.size()/2;
     
-  std::vector<T> left=Mergesort_cMem(array,0,mid,m_fLThan);
-  std::vector<T> right=Mergesort_cMem(array,mid,array.size(),m_fLThan);
-  return merge_cMem(left,right,m_fLThan);
+  std::pair<T*,size_t> left=Mergesort_cMem(std::pair<T*,size_t>(array.data(),mid),m_fLThan);
+  std::pair<T*,size_t> right=Mergesort_cMem(std::pair<T*,size_t>(&array.data()[mid],array.size()-mid),m_fLThan);
+  std::pair<T*,size_t> res=merge_cMem(left,right,m_fLThan);
+  return array;
 }
+
 
 #endif 
