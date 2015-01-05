@@ -32,7 +32,7 @@
 #define _MAX_FIB_NUMBER 93
 #define _MAX_FIB_NUMBER_DERIVED_FUNCTION 76
 #define _RND_NUMBER_GEN_SEED 42
-#define _MAX_VECTOR_SIZE_NUMBER 80000
+#define _MAX_VECTOR_SIZE_NUMBER 8000
 #define _MAX_VECTOR_STEP_INCREASE 100
 #define _VECTOR_TEST_PER_BATCH 5
 #define _CPU_CYCLES_MEASUREMENT "CPU_cycles"
@@ -1061,34 +1061,104 @@ TEST (SortableArrayTest,MergeSortCompactMemoryFunctionalTest)
   SortedVectorAssert(v);
 }
 
+#include <sstream>
+
 TEST (SortableArrayTest,HeapSortFunctionalTest)
 {
   std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,0);
   std::vector<int> v;
 
+  auto f=[](std::vector<int> v){
+    std::stringstream ss;
+    for (size_t i=0;i<v.size();i++)
+    {
+      ss<<" | "<<v[i]<<" |";
+    }    
+    return ss.str();
+  };
   v=Heapsort(toSort);
 
-  ASSERT_EQ(isHeap(v),true);
+  ASSERT_EQ(isHeap(v),true)<<" "<<f(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,1);
   v=Heapsort(toSort);
   
-  ASSERT_EQ(isHeap(v),true);
+  ASSERT_EQ(isHeap(v),true)<<" "<<f(v);
 
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,2);
   v=Heapsort(toSort);
 
-  ASSERT_EQ(isHeap(v),true);
+  ASSERT_EQ(isHeap(v),true)<<" "<<f(v);
   
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,3);
   v=Heapsort(toSort);
   
-  ASSERT_EQ(isHeap(v),true);
+  ASSERT_EQ(isHeap(v),true)<<" "<<f(v);
 
   toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,10);
   v=Heapsort(toSort);
 
-  ASSERT_EQ(isHeap(v),true);
+  ASSERT_EQ(isHeap(v),true)<<" "<<f(v);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,100);
+  v=Heapsort(toSort);
+
+  ASSERT_EQ(isHeap(v),true)<<" "<<f(v);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,500);
+  v=Heapsort(toSort);
+
+  ASSERT_EQ(isHeap(v),true)<<" "<<f(v);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,1000);
+  v=Heapsort(toSort);
+
+  ASSERT_EQ(isHeap(v),true)<<" "<<f(v);
+}
+
+TEST (SortableArrayTest,IntrosortFunctionalTest)
+{
+  std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,0);
+  std::vector<int> v;
+
+  v=Introsort(toSort);
+
+  SortedVectorAssert(v);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,1);
+  v=Introsort(toSort);
+  
+  SortedVectorAssert(v);
+
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,2);
+  v=Introsort(toSort);
+
+  SortedVectorAssert(v);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,3);
+  v=Introsort(toSort);
+  
+  SortedVectorAssert(v);
+
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,10);
+  v=Introsort(toSort);
+  SortedVectorAssert(v);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,100);
+  v=Introsort(toSort);
+  SortedVectorAssert(v);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,1000);
+  v=Introsort(toSort);
+  SortedVectorAssert(v);
+
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,5000);
+  v=Introsort(toSort);
+  SortedVectorAssert(v);
+  
+  toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,10000);
+  v=Introsort(toSort);
+  SortedVectorAssert(v);
 }
 #endif // TEST_RUN
 
@@ -1165,6 +1235,21 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
       stopWatchDataDump->dumpData();
       stopWatchDataDump->resetData();
       
+      stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"introsort"));
+      for (int i=0; i<batchNumber; i+=STEP_INCREASE(i))
+      {
+	std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
+	  for(int j=0;j<testPerBatch;j++)
+	  {
+	      stopWatchDataDump->StartMeter();
+	      res=Introsort(toSort);
+	      stopWatchDataDump->StopMeter();
+	  }
+	  stopWatchDataDump->StoreBatch();
+      }
+      stopWatchDataDump->dumpData();
+      stopWatchDataDump->resetData();
+          
       stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"mergesort"));
       for (int i=0; i<batchNumber; i+=STEP_INCREASE(i))
       {
@@ -1224,8 +1309,8 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
       }
       stopWatchDataDump->dumpData();
       stopWatchDataDump->resetData();
-      /*
-      stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"Heapsort"));
+
+      stopWatchDataDump->setFilename(generateFileName(_TIME_UNITS_MEASUREMENT,arrayTypes[k],"heapsort"));
       for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
       {
 	std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
@@ -1238,7 +1323,7 @@ TEST (SortingPerformanceTest,sortingFunctionsTime)
 	  stopWatchDataDump->StoreBatch();
       }
       stopWatchDataDump->dumpData();
-      stopWatchDataDump->resetData();*/
+      stopWatchDataDump->resetData();
       
     }
 }
@@ -1306,6 +1391,21 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
     cpuCycleDataDump->dumpData();
     cpuCycleDataDump->resetData();
     
+    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"introsort"));
+    for (int i=0; i<batchNumber; i+=STEP_INCREASE(i))
+    {
+      std::vector<int> toSort=generateRandomVector(_RND_NUMBER_GEN_SEED,i,arrayTypes[k]);
+        for(int j=0;j<testPerBatch;j++)
+	{
+	      cpuCycleDataDump->StartMeter();
+	      res=Introsort(toSort);
+	      cpuCycleDataDump->StopMeter();
+        }
+        cpuCycleDataDump->StoreBatch();
+    }
+    cpuCycleDataDump->dumpData();
+    cpuCycleDataDump->resetData();
+       
     cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"mergesort"));
     for (int i=0; i<batchNumber; i+=STEP_INCREASE(i))
     {
@@ -1369,8 +1469,8 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
     }
     cpuCycleDataDump->dumpData();
     cpuCycleDataDump->resetData();
-    /*
-    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"Heapsort"));
+    
+    cpuCycleDataDump->setFilename(generateFileName(_CPU_CYCLES_MEASUREMENT,arrayTypes[k],"heapsort"));
         
     for (int i=0; i<batchNumber; i+=_MAX_VECTOR_STEP_INCREASE)
     {
@@ -1384,7 +1484,7 @@ TEST (SortingPerformanceTest,sortingFunctionsCPUCycles)
         cpuCycleDataDump->StoreBatch();
     }
     cpuCycleDataDump->dumpData();
-    cpuCycleDataDump->resetData();*/
+    cpuCycleDataDump->resetData();
   }
 }
 #endif

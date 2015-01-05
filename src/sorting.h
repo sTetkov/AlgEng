@@ -6,6 +6,7 @@
 #include <utility>
 #include <assert.h>.
 #include <random>
+#include <cstdlib>
 
 static const size_t _SMALL_ARRAY_SIZE = 80;
 
@@ -211,54 +212,80 @@ bool isHeap(std::vector<T> array, std::function<bool(T,T)> m_fLThan=[](T a,T b){
 }
 
 template <typename T>
-std::vector<T> Heapify(std::vector<T> array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+bool isHeap(std::vector<T> array,size_t end, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
 {
-  if(array.size()==0) return array;
-  for (size_t i=(array.size()-1); i>0; i--)
-  {
-    if( m_fLThan(array[i],array[pIndex(i)]) ) swap(array[i],array[pIndex(i)]);
-  }
-  return array;
+  if (array.size()<2) return true;
+  for (size_t i=(end-1);  i>0; i--)
+    if( m_fLThan(array[i],array[pIndex(i)]) ) return false;
+  return true;
 }
 
 template<typename T>
-void siftUp(std::vector<T> &array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+void siftUp(std::vector<T> array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
 {
   assert(array.size()>0);
-  assert(isHeap(std::vector<T>(array.begin(),array.end()-1)));
+  assert(isHeap(array,array.size()-1,m_fLThan) );
   
-  size_t newElemIdx=array.size()-1;
-  while(true)
+  size_t newElementIdx=array.size()-1;
+  while (true)
   {
-    if(newElemIdx==0) break;
-    size_t pIdx=pIndex(newElemIdx);
-    if(!m_fLThan(array[newElemIdx],array[pIdx])) break;
-    swap(array[pIdx],array[newElemIdx]);
-    newElemIdx=pIdx;
-  }  
+    if(newElementIdx==0) break;
+    size_t parentIdx= pIndex(newElementIdx);
+    if(array[parentIdx]<=array[newElementIdx]) break;
+    swap(array[parentIdx],array[newElementIdx]);
+    newElementIdx=parentIdx;
+  }
+  
   assert(isHeap(array,m_fLThan));
+
 }
 
 template<typename T>
-void siftDown(std::vector<T> &array, size_t lim, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+void siftDown(std::pair<T*,size_t> array,size_t start, size_t end, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
 {
-  if((array.size()==0) | (lim==0)) return;
-  size_t end=pIndex(lim);
-  for(size_t i=0; i<=end; i++)
+  size_t pIdx=start;
+  size_t swapIdx;
+  while (lIndex(pIdx) < end) 
   {
-    if(m_fLThan(array[lIndex(i)],array[i])) swap(array[lIndex(i)],array[i]);
-    if(rIndex(i)>lim) return;
-    if(m_fLThan(array[rIndex(i)],array[i])) swap(array[rIndex(i)],array[i]);
+    swapIdx = lIndex(pIdx);
+    if(rIndex(pIdx)<end)
+      if (m_fLThan(array.first[swapIdx],array.first[rIndex(pIdx)]))
+	swapIdx=rIndex(pIdx);
+    if (m_fLThan(array.first[pIdx],array.first[swapIdx]))
+    {
+      swap(array.first[pIdx],array.first[swapIdx]);
+      pIdx = swapIdx;
+    } 
+    else 
+      return;
+  }
+}
+
+template <typename T>
+void Heapify(std::pair<T*,size_t> array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+{
+  for(long i=pIndex(array.second-1);i>=0;i--)
+  {
+    siftDown(array,static_cast<size_t>(i),array.second,m_fLThan);
+  }
+}
+
+template <typename T>
+void Heapsort(std::pair<T*,size_t> array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+{ 
+  if(array.second<2) return;
+  Heapify(array,m_fLThan);
+  for(size_t i=array.second-1;i>0;i--)
+  {
+    swap(array.first[0],array.first[i]);
+    siftDown(array,0,i,m_fLThan);
   }
 }
 
 template <typename T>
 std::vector<T> Heapsort(std::vector<T> array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
 {
-  if(array.size()==0) return array;
-  Heapify(array,m_fLThan);
-  for(size_t i=array.size()-1; i>0; i--)
-    siftDown(array,i,m_fLThan);
+  Heapsort(std::pair<T*,size_t>(&array[0],array.size()),m_fLThan);
   return array;
 }
 
@@ -339,6 +366,96 @@ std::vector<T> Mergesort_cMem(std::vector<T> &array, std::function<bool(T,T)> m_
   std::pair<T*,size_t> right=Mergesort_cMem(std::pair<T*,size_t>(&array.data()[mid],array.size()-mid),m_fLThan);
   merge_cMem(left,right,m_fLThan);
   return array;
+}
+
+#include <cmath>
+///\brief: Recursion deepth calculation
+size_t MaxRecursionDepth(size_t arraySize)
+{
+  return static_cast<size_t>(floor(2*log2(arraySize)));
+}
+
+template <typename T>
+void Insertionsort_pair(std::pair<T*,size_t> array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+{
+  for(size_t i=0; i<array.second; i++)
+  {
+    T key=array.first[i];
+    size_t j=i;
+    while ((j > 0) && m_fLThan(key,array.first[j-1]))
+    {
+      array.first[j]=array.first[j-1];
+      j=j-1;
+    }
+    array.first[j]=key;
+  }
+}
+
+template <typename T>
+std::pair<size_t,size_t> partitionPivot(std::pair<T*,size_t> array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+{
+  size_t pivotIdx=std::rand()%array.second;
+  T pivot=array.first[pivotIdx];
+  size_t left=0;
+  size_t right=array.second-1;
+  for(size_t j=0;j<=right;j++)
+  {
+    if(m_fLThan(array.first[j],pivot))
+    {
+      if(j>left)
+      {
+	swap(array.first[j],array.first[left++]);
+	j--;
+      }
+      else
+	left++;
+      
+    }
+    else if(m_fLThan(pivot,array.first[j]))
+    {
+      swap(array.first[j],array.first[right]);
+      right--;
+      j--;
+    }
+  }
+  return std::pair<size_t,size_t>(left,right);
+}
+
+///\brief: Introsort
+template<typename T>
+void Introsort(std::pair<T*,size_t> array, size_t recDepth, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+{
+  while(array.second>_SMALL_ARRAY_SIZE)
+  {
+    if(recDepth==0)
+    {
+      Heapsort(array,m_fLThan);
+      return;
+    }
+		
+    recDepth--;
+
+    std::pair<size_t,size_t> pivotIndex=partitionPivot(array,m_fLThan);//fatpartition could be slower, need to check, probably slow
+							//std::partition3 to see if faster; Partition can be improved
+    std::pair<T*,size_t> left(array.first,pivotIndex.first); //pair of (pointer,size)
+    std::pair<T*,size_t> right(&array.first[pivotIndex.second],array.second-pivotIndex.second);
+    if(left.second<right.second) swap(left,right);
+
+    Introsort(left,recDepth,m_fLThan);
+    array=right;
+  }
+  Insertionsort_pair(array,m_fLThan);	
+
+}
+
+
+///\brief: Introsort
+template<typename T>
+std::vector<T> Introsort(std::vector<T> array, std::function<bool(T,T)> m_fLThan=[](T a,T b){return a<b;})
+{
+    Introsort(std::pair<T*,size_t>(&array[0],array.size()),MaxRecursionDepth(array.size()),m_fLThan);
+    Insertionsort(std::pair<T*,size_t>(&array[0],array.size()),m_fLThan);
+    return array;
 }
 
 
