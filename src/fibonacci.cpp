@@ -14,6 +14,7 @@
 #include "cMeterDataDump.h"
 #include "cCPUMeterFunctions.h"
 #include "sorting.h"
+
 #include "sorting.cpp"
 #include "matrix.h"
 
@@ -359,7 +360,9 @@ unsigned long getLookUpTableFibonacciValue(unsigned long n)
 
 /// \brief: fibonacci number Exponentiation By Squaring using constant memory
 ///
-unsigned long fibonacciExpBySquareConsMem(unsigned long n)
+/// Still a little bit a mess. Problemas are caused by the implementation of the matrix. Will need to fix that
+/// before I can have a cleaner code.
+unsigned long fibonacciExpBySquareConsMem(unsigned int n)
 {
     #ifdef TEST_RUN
     EXPECT_LE(n,_MAX_FIB_NUMBER)<< "A excessive value" << n << "was passed to fibonacciExpBySquareConsMem";
@@ -450,7 +453,7 @@ unsigned long fibonacciExpBySquareConsMem(unsigned long n)
    unsigned long ret=*resM(0,1);
    return ret;  
 }
-
+/*
 #ifdef TEST_RUN
 TEST (FibonacciTest,fibonacciExpByConstMemSquareFunction)
 {
@@ -466,7 +469,7 @@ TEST (FibonacciTest,fibonacciExpByConstMemSquareFunction)
         ASSERT_EQ(fibonacciExpBySquareConsMem(9),34)<< "fibonacciExpBySquareConsMem returned "<<fibonacciExpBySquareConsMem(9)<< " instead of "<<34;
         ASSERT_EQ(fibonacciExpBySquareConsMem(10),55)<< "fibonacciExpBySquareConsMem returned "<<fibonacciExpBySquareConsMem(10)<< " instead of "<<55;
 }
-#endif
+#endif*/
 
 /// \brief: fibonacci number Exponentiation By Squaring using constant memory
 ///
@@ -575,8 +578,6 @@ void initializeMeterFunctions()
       stopCPUMeterFunc=stopRDTSC;
     cpuMeter=new cMeter<uint64_t>(startCPUMeterFunc);
     cpuMeter->setSpecificStopFunction(stopCPUMeterFunc);
-    /*startCPUMeterFunc=RDTSC;
-    cpuMeter=new cMeter<uint64_t>(startCPUMeterFunc);*/
     cpuMeter->setUnitName("cpu_cycles");
     cpuMeter->setUnitSymbol("cycles");
     cpuCycleDataDump=new cMeterDataDump<uint64_t>(cpuMeter);
@@ -680,7 +681,7 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsTime)
         for(int j=0;j<testPerBatch;j++)
         {
             stopWatchDataDump->StartMeter();
-            ret=fibonacciExpBySquareConsMem(i);
+            ret=fibonacciExpBySquareConsMemSimplified(i);
             stopWatchDataDump->StopMeter();
         }
         stopWatchDataDump->StoreBatch();
@@ -788,7 +789,7 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsCPUCycles)
         for(int j=0;j<testPerBatch;j++)
         {
             cpuCycleDataDump->StartMeter();
-            ret=fibonacciExpBySquareConsMem(i);
+            ret=fibonacciExpBySquareConsMemSimplified(i);
             cpuCycleDataDump->StopMeter();
         }
         cpuCycleDataDump->StoreBatch();
@@ -799,6 +800,7 @@ TEST (FibonacciPerformanceTest,fibonacciFunctionsCPUCycles)
 }
 #endif
 
+/// \brief Generates a random vector with size size and normal distribution
 std::vector<int> generateRandomVector(int seed, int size)
 {
     std::mt19937 gen;
@@ -810,6 +812,7 @@ std::vector<int> generateRandomVector(int seed, int size)
     return res;
 }
 
+/// \brief Generates a random vector with a specific type of characteristics
 std::vector<int> generateRandomVector(int seed, int size, std::string distributionType)
 {
   if(distributionType==std::string(_NORMAL_DIST))
@@ -875,6 +878,8 @@ std::vector<int> generateRandomVector(int seed, int size, std::string distributi
     return res;
 }
 
+
+/// \brief generates a filename for the performance data dump
 std::string generateFileName(std::string MeasurementType, std::string attributes, std::string algorithm)
 {
   std::string res=MeasurementType+"_"+attributes+"_"+algorithm;
@@ -883,6 +888,8 @@ std::string generateFileName(std::string MeasurementType, std::string attributes
 }
 
 ///As for the moment I need to include the cpp, it became necessary to move the functional tests here
+///Being simple functions I may decide to move all the tests to a secondary file, once the rest of the code has
+/// been cleaned up
 #ifdef TEST_RUN
 
 void SortedVectorAssert(std::vector<int> v)
@@ -1173,6 +1180,9 @@ int compare_ints(const void* a, const void* b)   // comparison function
     return 0;
 }
 
+
+/// \brief: Removed the slower sorting functions from the perfromance test
+/// as they required too much time and added very little information.
 TEST (SortingPerformanceTest,sortingFunctionsTime)
 {
     int batchNumber=_MAX_VECTOR_SIZE_NUMBER;
