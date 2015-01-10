@@ -23,8 +23,8 @@
 #include "cMeterDataDump.cpp"
 #include <chrono>
 #include <algorithm>
-
 #include <random>
+#include "cpuProperties.h"
 
 #ifdef TEST_RUN
 #include "gtest/gtest.h"
@@ -77,11 +77,7 @@ std::function<uint64_t()> startCPUMeterFunc;
 std::function<uint64_t()> stopCPUMeterFunc;
 cMeterDataDump<uint64_t>* cpuCycleDataDump;
 
-int main(
-         #ifdef TEST_RUN
-         int argc, char **argv
-         #endif
-         )
+int main(int argc, char **argv)
 {
     ///There are macros that trick the preprocessor in generating a look up table using constexpr, but they are a little bit a mess.
     ///I will include them once the rest of the code is fixed. For the moment I generate the table at runtime.
@@ -91,6 +87,7 @@ int main(
     initializeMeterFunctions();
     return RUN_ALL_TESTS();
     #else
+    PrintCacheLevels();
     return 0;
     #endif // TEST_RUN
 }
