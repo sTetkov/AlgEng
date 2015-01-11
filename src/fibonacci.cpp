@@ -87,6 +87,7 @@ int main(int argc, char **argv)
     initializeMeterFunctions();
     return RUN_ALL_TESTS();
     #else
+    GenerateMemoryMountainData((BYTES_IN_GB)>>5,(BYTES_IN_MB)>>1);
     PrintCacheLevels();
     return 0;
     #endif // TEST_RUN
